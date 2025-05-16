@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "ThrowingGameCharacter.h"
-#include "ThrowingGameProjectile.h"
+#include "Player/ThrowingGameCharacter.h"
+#include "Projectile/Dagger.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -35,6 +36,23 @@ AThrowingGameCharacter::AThrowingGameCharacter()
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
+	NumDashs = 3;
+	IsDashing = false;
+	IsSliding = false;
+	DashCooldown = 0.075f;
+	DashStrength = 2400.0f;
+	CanDash = true;
+	DashRefillDelay = 3.f;
+}
+
+void AThrowingGameCharacter::RefillDash()
+{
+	NumDashs++;
+
+	if (NumDashs < 3)
+	{
+		GetWorldTimerManager().SetTimer(DashRefill_TimerHandle, this, &AThrowingGameCharacter::RefillDash, DashRefillDelay, false);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -77,14 +95,17 @@ void AThrowingGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 void AThrowingGameCharacter::Move(const FInputActionValue& Value)
 {
-	// input is a Vector2D
-	FVector2D MovementVector = Value.Get<FVector2D>();
-
-	if (Controller != nullptr)
+	if (IsSliding == false)
 	{
-		// add movement 
-		AddMovementInput(GetActorForwardVector(), MovementVector.Y);
-		AddMovementInput(GetActorRightVector(), MovementVector.X);
+		// input is a Vector2D
+		FVector2D MovementVector = Value.Get<FVector2D>();
+
+		if (Controller != nullptr)
+		{
+			// add movement 
+			AddMovementInput(GetActorForwardVector(), MovementVector.Y);
+			AddMovementInput(GetActorRightVector(), MovementVector.X);
+		}
 	}
 }
 
@@ -99,4 +120,37 @@ void AThrowingGameCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AThrowingGameCharacter::Dash(const FInputActionValue& Value)
+{
+	if (IsDashing == false && NumDashs > 0)
+	{
+		IsDashing = true;
+		NumDashs--;
+
+		FVector playerVelocity = GetVelocity();
+
+		FVector MovementDirection = GetCharacterMovement()->GetLastInputVector();
+		MovementDirection.Normalize();
+
+		GetCharacterMovement()->StopMovementImmediately();
+
+		LaunchCharacter(MovementDirection * DashStrength, true, true);
+
+		if (!GetWorldTimerManager().IsTimerActive(DashRefill_TimerHandle))
+		{
+			GetWorldTimerManager().SetTimer(DashRefill_TimerHandle, this, &AThrowingGameCharacter::RefillDash, DashRefillDelay, false);
+		}
+	}
+}
+
+void AThrowingGameCharacter::Slide(const FInputActionValue& Value)
+{
+	SideDir = GetActorForwardVector();
+}
+
+void AThrowingGameCharacter::Throw(const FInputActionValue& Value)
+{
+
 }

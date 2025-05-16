@@ -41,6 +41,15 @@ class AThrowingGameCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=Input, meta=(AllowPrivateAccess = "true"))
 	UInputAction* MoveAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* DashAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SlideAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ThrowAction;
+
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
@@ -48,12 +57,39 @@ class AThrowingGameCharacter : public ACharacter
 public:
 	AThrowingGameCharacter();
 
+	void RefillDash();
+
 protected:
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
+
+	/** Called for Dash input */
+	void Dash(const FInputActionValue& Value);
+
+	/** Called for Sliding input */
+	void Slide(const FInputActionValue& Value);
+
+	/** Called for Sliding input */
+	void Throw(const FInputActionValue& Value);
+
+protected:
+	FVector SideDir;
+
+	bool IsDashing;
+	bool IsSliding;
+	bool CanDash;
+
+	int32 NumDashs;
+
+	float DashCooldown;
+	float DashStrength;
+	float DashRefillDelay;
+
+	FTimerHandle DashCooldown_TimerHandle;
+	FTimerHandle DashRefill_TimerHandle;
 
 protected:
 	// APawn interface
@@ -66,6 +102,7 @@ public:
 	USkeletalMeshComponent* GetMesh1P() const { return Mesh1P; }
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
 
 };
 

@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "ThrowingGamePickUpComponent.h"
+#include "Old/ThrowingGamePickUpComponent.h"
 
 UThrowingGamePickUpComponent::UThrowingGamePickUpComponent()
 {

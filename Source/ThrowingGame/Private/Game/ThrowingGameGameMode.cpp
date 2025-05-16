@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "ThrowingGameGameMode.h"
-#include "ThrowingGameCharacter.h"
+#include "Game/ThrowingGameGameMode.h"
+#include "Player/ThrowingGameCharacter.h"
 #include "UObject/ConstructorHelpers.h"
 
 AThrowingGameGameMode::AThrowingGameGameMode()

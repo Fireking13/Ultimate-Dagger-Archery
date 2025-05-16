@@ -1,7 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "Projectile.h"
+#include "Projectile/Projectile.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -25,3 +24,50 @@ void AProjectile::Tick(float DeltaTime)
 
 }
 
+void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+}
+
+void AProjectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+}
+
+void AProjectile::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+}
+
+float AProjectile::GetProjectileDamage()
+{
+	return Damage;
+}
+
+float AProjectile::GetProjectileSpeed()
+{
+	return 0.0f;
+}
+
+float AProjectile::GetProjectileLifeSpan()
+{
+	return 0.0f;
+}
+
+UProjectileMovementComponent* AProjectile::GetProjectileMovement()
+{
+	return nullptr;
+}
+
+void AProjectile::SetDamage(float damage)
+{
+}
+
+void AProjectile::SetSpeed(float speed)
+{
+}
+
+void AProjectile::DestroyProjectile()
+{
+}
+
+void AProjectile::InitializeStats()
+{
+}

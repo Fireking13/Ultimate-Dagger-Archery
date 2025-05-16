@@ -1,9 +1,9 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 
-#include "ThrowingGameWeaponComponent.h"
-#include "ThrowingGameCharacter.h"
-#include "ThrowingGameProjectile.h"
+#include "Old/ThrowingGameWeaponComponent.h"
+#include "Player/ThrowingGameCharacter.h"
+#include "Old/ThrowingGameProjectile.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"

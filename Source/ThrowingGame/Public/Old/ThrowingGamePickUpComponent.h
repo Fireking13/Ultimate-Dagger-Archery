@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SphereComponent.h"
-#include "ThrowingGameCharacter.h"
+#include "Player/ThrowingGameCharacter.h"
 #include "ThrowingGamePickUpComponent.generated.h"
 
 // Declaration of the delegate that will be called when someone picks this up
