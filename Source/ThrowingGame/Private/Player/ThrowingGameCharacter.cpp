@@ -19,6 +19,8 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 AThrowingGameCharacter::AThrowingGameCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
 		
@@ -36,23 +38,111 @@ AThrowingGameCharacter::AThrowingGameCharacter()
 	Mesh1P->CastShadow = false;
 	Mesh1P->SetRelativeLocation(FVector(-30.f, 0.f, -150.f));
 
-	NumDashs = 3;
+	MaxNumDashs = 3;
+	NumDashs = MaxNumDashs;
 	IsDashing = false;
 	IsSliding = false;
-	DashCooldown = 0.075f;
-	DashStrength = 2400.0f;
 	CanDash = true;
+	DashCooldown = 0.25f;
+	DashStrength = 2400.0f;
 	DashRefillDelay = 3.f;
+	SlideSpeed = 2400.0f;
+	SlideMovementMul = 100.0f;
+	SlideJumpMul = 1.75f;
+}
+
+void AThrowingGameCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (IsSliding)
+	{
+		Sliding(DeltaTime);
+	}
 }
 
 void AThrowingGameCharacter::RefillDash()
 {
 	NumDashs++;
 
-	if (NumDashs < 3)
+	if (NumDashs < MaxNumDashs)
 	{
 		GetWorldTimerManager().SetTimer(DashRefill_TimerHandle, this, &AThrowingGameCharacter::RefillDash, DashRefillDelay, false);
 	}
+}
+
+void AThrowingGameCharacter::ResetDash()
+{
+	IsDashing = false;
+
+	UCharacterMovementComponent* moveComp = GetCharacterMovement();
+
+	moveComp->GroundFriction = OG_GroundFriction;
+	moveComp->BrakingFrictionFactor = OG_BrakingFrictionFactor;
+	moveComp->BrakingDecelerationWalking = OG_BrakingDecelerationWalking;
+}
+
+void AThrowingGameCharacter::Sliding(float DeltaTime)
+{
+	UCharacterMovementComponent* moveComp = GetCharacterMovement();
+
+	if (moveComp->IsMovingOnGround())
+	{
+		if (moveComp->MaxWalkSpeed != SlideSpeed)
+		{
+			moveComp->MaxWalkSpeed = SlideSpeed;
+		}
+	}
+	else
+	{
+		if (moveComp->MaxWalkSpeed != OG_Speed)
+		{
+			moveComp->MaxWalkSpeed = OG_Speed;
+		}
+	}
+
+	FVector newSideDir = moveComp->Velocity.GetSafeNormal();
+	if (newSideDir.IsNearlyZero())
+	{
+		newSideDir = SideDir; // Fallback
+	}
+
+	FHitResult HitResult;
+	FVector Start = GetActorLocation();
+	FVector End = Start + (newSideDir * 150.f);
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility,
+		QueryParams
+	);
+
+	if (bHit && !moveComp->IsWalkable(HitResult))
+	{
+		StopSlide();
+		return;
+	}
+
+	AddMovementInput(SideDir, SlideSpeed * DeltaTime);
+}
+
+void AThrowingGameCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UCharacterMovementComponent* moveComp = GetCharacterMovement();
+
+	OG_GroundFriction = moveComp->GroundFriction;
+	OG_BrakingFrictionFactor = moveComp->BrakingFrictionFactor;
+	OG_BrakingDecelerationWalking = moveComp->BrakingDecelerationWalking;
+
+	OG_JumpHeight = moveComp->JumpZVelocity;
+	OG_Speed = moveComp->MaxWalkSpeed;
 }
 
 //////////////////////////////////////////////////////////////////////////// Input
@@ -77,7 +167,7 @@ void AThrowingGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AThrowingGameCharacter::SlideJumpCheck);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
@@ -85,6 +175,13 @@ void AThrowingGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AThrowingGameCharacter::Look);
+
+		EnhancedInputComponent->BindAction(DashAction, ETriggerEvent::Triggered, this, &AThrowingGameCharacter::Dash);
+
+		EnhancedInputComponent->BindAction(SlideAction, ETriggerEvent::Started, this, &AThrowingGameCharacter::Slide);
+		EnhancedInputComponent->BindAction(SlideAction, ETriggerEvent::Completed, this, &AThrowingGameCharacter::StopSlide);
+
+		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Triggered, this, &AThrowingGameCharacter::Throw);
 	}
 	else
 	{
@@ -95,16 +192,18 @@ void AThrowingGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 
 void AThrowingGameCharacter::Move(const FInputActionValue& Value)
 {
-	if (IsSliding == false)
-	{
-		// input is a Vector2D
-		FVector2D MovementVector = Value.Get<FVector2D>();
+	FVector2D MovementVector = Value.Get<FVector2D>();
 
-		if (Controller != nullptr)
+	if (Controller != nullptr)
+	{
+		if (!IsSliding)
 		{
-			// add movement 
 			AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 			AddMovementInput(GetActorRightVector(), MovementVector.X);
+		}
+		else
+		{
+			AddMovementInput(GetActorRightVector(), MovementVector.X * SlideMovementMul);
 		}
 	}
 }
@@ -129,14 +228,28 @@ void AThrowingGameCharacter::Dash(const FInputActionValue& Value)
 		IsDashing = true;
 		NumDashs--;
 
-		FVector playerVelocity = GetVelocity();
+		UCharacterMovementComponent* moveComp = GetCharacterMovement();
 
-		FVector MovementDirection = GetCharacterMovement()->GetLastInputVector();
-		MovementDirection.Normalize();
+		moveComp->GroundFriction = 0.0f;
+		moveComp->BrakingFrictionFactor = 0.0f;
+		moveComp->BrakingDecelerationWalking = 0.0f;
 
-		GetCharacterMovement()->StopMovementImmediately();
+		FVector MovementDirection = moveComp->GetLastInputVector();
+
+		if (!MovementDirection.IsNearlyZero())
+		{
+			MovementDirection.Normalize();
+		}
+		else
+		{
+			MovementDirection = GetActorForwardVector(); 
+		}
+
+		moveComp->StopMovementImmediately();
 
 		LaunchCharacter(MovementDirection * DashStrength, true, true);
+
+		GetWorldTimerManager().SetTimer(DashCooldown_TimerHandle, this, &AThrowingGameCharacter::ResetDash, DashCooldown, false);
 
 		if (!GetWorldTimerManager().IsTimerActive(DashRefill_TimerHandle))
 		{
@@ -145,12 +258,58 @@ void AThrowingGameCharacter::Dash(const FInputActionValue& Value)
 	}
 }
 
-void AThrowingGameCharacter::Slide(const FInputActionValue& Value)
+void AThrowingGameCharacter::Slide()
 {
+	IsSliding = true;
 	SideDir = GetActorForwardVector();
+
+	GetCapsuleComponent()->SetCapsuleHalfHeight(GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() / 2);
+	//float newHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+
+	UCharacterMovementComponent* moveComp = GetCharacterMovement();
+
+	moveComp->GroundFriction = 0.0f;
+	moveComp->BrakingFrictionFactor = 0.0f;
+	moveComp->BrakingDecelerationWalking = 0.0f;
+}
+
+void AThrowingGameCharacter::StopSlide()
+{
+	if (IsSliding)
+	{
+		IsSliding = false;
+
+		GetCapsuleComponent()->SetCapsuleHalfHeight(GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() * 2);
+		//float newHalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+
+		UCharacterMovementComponent* moveComp = GetCharacterMovement();
+
+		moveComp->GroundFriction = OG_GroundFriction;
+		moveComp->BrakingFrictionFactor = OG_BrakingFrictionFactor;
+		moveComp->BrakingDecelerationWalking = OG_BrakingDecelerationWalking;
+
+		moveComp->MaxWalkSpeed = OG_Speed;
+	}
 }
 
 void AThrowingGameCharacter::Throw(const FInputActionValue& Value)
 {
 
 }
+
+void AThrowingGameCharacter::SlideJumpCheck()
+{
+	UCharacterMovementComponent* moveComp = GetCharacterMovement();
+
+	if (IsSliding && moveComp->IsMovingOnGround())
+	{
+		moveComp->JumpZVelocity = OG_JumpHeight * SlideJumpMul;
+	}
+	else if (moveComp->JumpZVelocity != OG_JumpHeight)
+	{
+		moveComp->JumpZVelocity = OG_JumpHeight;
+	}
+
+	Jump();
+}
+

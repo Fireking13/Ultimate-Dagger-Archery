@@ -57,9 +57,17 @@ class AThrowingGameCharacter : public ACharacter
 public:
 	AThrowingGameCharacter();
 
+	virtual void Tick(float DeltaTime) override;
+
 	void RefillDash();
 
+	void ResetDash();
+
+	void Sliding(float DeltaTime);
+
 protected:
+	virtual void BeginPlay() override;
+
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
@@ -70,10 +78,18 @@ protected:
 	void Dash(const FInputActionValue& Value);
 
 	/** Called for Sliding input */
-	void Slide(const FInputActionValue& Value);
+	void Slide();
+
+	/** Called for Sliding input */
+	void StopSlide();
 
 	/** Called for Sliding input */
 	void Throw(const FInputActionValue& Value);
+
+
+	void SlideJumpCheck();
+	//virtual void Jump() override;
+	//virtual void StopJumping() override;
 
 protected:
 	FVector SideDir;
@@ -82,6 +98,7 @@ protected:
 	bool IsSliding;
 	bool CanDash;
 
+	int32 MaxNumDashs;
 	int32 NumDashs;
 
 	float DashCooldown;
@@ -90,6 +107,17 @@ protected:
 
 	FTimerHandle DashCooldown_TimerHandle;
 	FTimerHandle DashRefill_TimerHandle;
+
+	float OG_GroundFriction;
+	float OG_BrakingFrictionFactor;
+	float OG_BrakingDecelerationWalking;
+
+	float SlideSpeed;
+	float SlideMovementMul;
+	float SlideJumpMul;
+
+	float OG_JumpHeight;
+	float OG_Speed;
 
 protected:
 	// APawn interface
