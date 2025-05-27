@@ -34,6 +34,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Projectile Properties")
 	FTimerHandle Destroy_TimerHandle;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Projectile Properties")
+	bool IsActive;
+
 protected:
 
 	UPROPERTY(EditAnywhere)
@@ -104,4 +107,6 @@ public:
 
 	UFUNCTION()
 	virtual void InitializeStats();
+
+	bool GetIsActive();
 };

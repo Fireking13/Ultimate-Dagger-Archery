@@ -54,6 +54,7 @@ class AThrowingGameCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* LookAction;
 	
+
 public:
 	AThrowingGameCharacter();
 
@@ -64,6 +65,14 @@ public:
 	void ResetDash();
 
 	void Sliding(float DeltaTime);
+
+	void Refill();
+
+	void Shoot();
+
+	class ADagger* GetDaggerFromPool();
+
+	void SetTargetPoint();
 
 protected:
 	virtual void BeginPlay() override;
@@ -85,7 +94,6 @@ protected:
 
 	/** Called for Sliding input */
 	void Throw(const FInputActionValue& Value);
-
 
 	void SlideJumpCheck();
 	//virtual void Jump() override;
@@ -118,6 +126,23 @@ protected:
 
 	float OG_JumpHeight;
 	float OG_Speed;
+
+	TArray<class ADagger*> DaggerPool;
+	class ADagger* DaggersReady[5];
+	bool DaggerSpots[5];
+
+	int8 Ammo;
+	int8 FireIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dagger")
+	TSubclassOf<class ADagger> BP_Dagger;
+
+	FVector TargetPoint;
+
+	//FTimerHandle Adjust_TimerHandle;
+
+	float AdjustTimer;
+	float AdjustTimerMax;
 
 protected:
 	// APawn interface

@@ -11,6 +11,9 @@
 #include "InputActionValue.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "EngineUtils.h"
+
+#include "Projectile/Dagger.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -49,6 +52,14 @@ AThrowingGameCharacter::AThrowingGameCharacter()
 	SlideSpeed = 2400.0f;
 	SlideMovementMul = 100.0f;
 	SlideJumpMul = 1.75f;
+	FireIndex = 1;
+	AdjustTimer = 0.0f;
+	AdjustTimerMax = 1.0f;
+
+	for (bool daggerSpot : DaggerSpots)
+	{
+		daggerSpot = false;
+	}
 }
 
 void AThrowingGameCharacter::Tick(float DeltaTime)
@@ -59,6 +70,29 @@ void AThrowingGameCharacter::Tick(float DeltaTime)
 	{
 		Sliding(DeltaTime);
 	}
+
+	AdjustTimer += DeltaTime;
+
+	if (AdjustTimer >= AdjustTimerMax)
+	{
+		AdjustTimer = 0.0f;
+	}
+}
+
+void AThrowingGameCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UCharacterMovementComponent* moveComp = GetCharacterMovement();
+
+	OG_GroundFriction = moveComp->GroundFriction;
+	OG_BrakingFrictionFactor = moveComp->BrakingFrictionFactor;
+	OG_BrakingDecelerationWalking = moveComp->BrakingDecelerationWalking;
+
+	OG_JumpHeight = moveComp->JumpZVelocity;
+	OG_Speed = moveComp->MaxWalkSpeed;
+
+
 }
 
 void AThrowingGameCharacter::RefillDash()
@@ -131,18 +165,101 @@ void AThrowingGameCharacter::Sliding(float DeltaTime)
 	AddMovementInput(SideDir, SlideSpeed * DeltaTime);
 }
 
-void AThrowingGameCharacter::BeginPlay()
+void AThrowingGameCharacter::Refill()
 {
-	Super::BeginPlay();
+	FireIndex = 1;
 
-	UCharacterMovementComponent* moveComp = GetCharacterMovement();
+	int8 index = 0;
 
-	OG_GroundFriction = moveComp->GroundFriction;
-	OG_BrakingFrictionFactor = moveComp->BrakingFrictionFactor;
-	OG_BrakingDecelerationWalking = moveComp->BrakingDecelerationWalking;
+	for (bool daggerSpot : DaggerSpots)
+	{
+		if (!daggerSpot)
+		{
+			DaggersReady[index] = GetDaggerFromPool();
 
-	OG_JumpHeight = moveComp->JumpZVelocity;
-	OG_Speed = moveComp->MaxWalkSpeed;
+			DaggersReady[index]->Reset(index);
+
+			daggerSpot = true;
+		}
+
+		index++;
+	}
+}
+
+void AThrowingGameCharacter::Shoot()
+{
+	DaggersReady[FireIndex]->Shoot();
+
+	FireIndex++;
+
+	if (FireIndex > 5)
+	{
+		Refill(); //TDOD: chanage
+	}
+}
+
+ADagger* AThrowingGameCharacter::GetDaggerFromPool()
+{
+	ADagger* newDagger = nullptr;
+
+	for (ADagger* dagger : DaggerPool)
+	{
+		if (!dagger->GetIsActive())
+		{
+			newDagger = dagger;
+			break;
+		}
+	}
+
+	if (newDagger == nullptr)
+	{
+		UWorld* const World = GetWorld();
+		FVector SpawnLocation = GetActorLocation();
+		FRotator SpawnRot(0.0f, GetControlRotation().Yaw, 0.0f);
+		FActorSpawnParameters SpawnParams;
+
+		newDagger = World->SpawnActor<ADagger>(BP_Dagger, SpawnLocation, SpawnRot, SpawnParams);
+		DaggerPool.Add(newDagger);
+	}
+
+	return newDagger;
+}
+
+void AThrowingGameCharacter::SetTargetPoint()
+{
+	FHitResult HitResult;
+	FVector Start = FirstPersonCameraComponent->GetComponentLocation();
+	FVector End = Start + (FirstPersonCameraComponent->GetForwardVector() * 10000.f);
+
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(this);
+
+	for (TActorIterator<AActor> It(GetWorld()); It; ++It) //loop thorugh all actor
+	{
+		AActor* Actor = *It;
+
+		if (Actor->ActorHasTag("Projectile") || Actor->ActorHasTag("Projectile Never Hit"))
+		{
+			QueryParams.AddIgnoredActor(Actor);
+		}
+	}
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		Start,
+		End,
+		ECC_Visibility,
+		QueryParams
+	);
+
+	if (HitResult.GetActor() != nullptr)
+	{
+		TargetPoint = HitResult.ImpactPoint;
+	}
+	else
+	{
+		TargetPoint = End;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////// Input

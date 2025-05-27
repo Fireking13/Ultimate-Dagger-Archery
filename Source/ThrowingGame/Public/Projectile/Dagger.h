@@ -22,6 +22,16 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	bool HasShoot;
+
+	//FTimerHandle Adjust_TimerHandle;
+
+	class AThrowingGameCharacter* PlayerCharacter;
+
+	TArray<FVector> SpawnLocations;
+
+	int LocationIndex;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -49,4 +59,14 @@ public:
 		const FHitResult& SweepResult) override;
 
 	virtual void InitializeStats() override;
+
+	void Shoot();
+
+	void Adjust();
+
+	void Spawn(class AThrowingGameCharacter* player);
+
+	void Reset(int posNum);
+
+	virtual void DestroyProjectile() override;
 };
