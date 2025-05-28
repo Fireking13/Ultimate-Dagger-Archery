@@ -2,8 +2,10 @@
 
 #include "Projectile/Dagger.h"
 #include "Components/SphereComponent.h"
+#include "Camera/CameraComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Player/ThrowingGameCharacter.h"
+#include "PlacedDagger.h"
 
 ADagger::ADagger()
 {
@@ -55,20 +57,46 @@ void ADagger::Tick(float DeltaTime)
 
 	if (HasShoot)
 	{
-
-
-
 		ProjectileMovementComponent->Velocity = GetActorForwardVector() * Speed * DeltaTime * 100.0f;
 	}
+	else
+	{
+		ResetSpawnLocations();
+
+
+	}
+}
+
+void ADagger::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+}
+
+void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+}
+
+void ADagger::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+}
+
+void ADagger::InitializeStats()
+{
 }
 
 void ADagger::Shoot()
 {
-	Adjust();
+	FoucedAdjust();
 	HasShoot = true;
 }
 
-void ADagger::Adjust()
+void ADagger::FoucedAdjust()
+{
+	ResetSpawnLocations();
+
+
+}
+
+void ADagger::Adjust(FVector targetPos)
 {
 	if (true)
 	{
@@ -79,16 +107,12 @@ void ADagger::Adjust()
 void ADagger::Spawn(AThrowingGameCharacter* player)
 {
 	PlayerCharacter = player;
-
-	SpawnLocations.Add(PlayerCharacter->GetActorLocation() + (-PlayerCharacter->GetActorRightVector()) * 100.0f);
-	SpawnLocations.Add(PlayerCharacter->GetActorLocation() + FVector(0.0f, 0.0f, 59.04f) + (-PlayerCharacter->GetActorRightVector()) * 64.0f);
-	SpawnLocations.Add(PlayerCharacter->GetActorLocation() + FVector(0.0f, 0.0f, 100.0f));
-	SpawnLocations.Add(PlayerCharacter->GetActorLocation() + FVector(0.0f, 0.0f, 59.04f) + PlayerCharacter->GetActorRightVector() * 64.0f);
-	SpawnLocations.Add(PlayerCharacter->GetActorLocation() + PlayerCharacter->GetActorRightVector() * 100.0f);
 }
 
 void ADagger::Reset(int posNum)
 {
+	ResetSpawnLocations();
+
 	IsActive = true;
 	LocationIndex = posNum;
 	SetActorLocation(PlayerCharacter->GetActorLocation());
@@ -99,4 +123,19 @@ void ADagger::DestroyProjectile()
 {
 	IsActive = false;
 	HasShoot = false;
+}
+
+void ADagger::ResetSpawnLocations()
+{
+	if (PlayerCharacter)
+	{
+		FVector pos = PlayerCharacter->GetFirstPersonCameraComponent()->GetComponentLocation();
+		FVector rightVec = PlayerCharacter->GetFirstPersonCameraComponent()->GetRightVector();
+
+		SpawnLocations.Add(pos + (-rightVec) * 100.0f);
+		SpawnLocations.Add(pos + FVector(0.0f, 0.0f, 59.04f) + (-rightVec) * 64.0f);
+		SpawnLocations.Add(pos + FVector(0.0f, 0.0f, 100.0f));
+		SpawnLocations.Add(pos + FVector(0.0f, 0.0f, 59.04f) + rightVec * 64.0f);
+		SpawnLocations.Add(pos + rightVec * 100.0f);
+	}
 }

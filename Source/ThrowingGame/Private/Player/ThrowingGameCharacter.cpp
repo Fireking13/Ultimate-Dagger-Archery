@@ -75,6 +75,14 @@ void AThrowingGameCharacter::Tick(float DeltaTime)
 
 	if (AdjustTimer >= AdjustTimerMax)
 	{
+		for (ADagger* dagger: DaggersReady)
+		{
+			if (dagger)
+			{
+				dagger->Adjust();
+			}
+		}
+
 		AdjustTimer = 0.0f;
 	}
 }
@@ -167,7 +175,7 @@ void AThrowingGameCharacter::Sliding(float DeltaTime)
 
 void AThrowingGameCharacter::Refill()
 {
-	FireIndex = 1;
+	FireIndex = 0;
 
 	int8 index = 0;
 
@@ -192,7 +200,7 @@ void AThrowingGameCharacter::Shoot()
 
 	FireIndex++;
 
-	if (FireIndex > 5)
+	if (FireIndex > 4)
 	{
 		Refill(); //TDOD: chanage
 	}
@@ -213,13 +221,17 @@ ADagger* AThrowingGameCharacter::GetDaggerFromPool()
 
 	if (newDagger == nullptr)
 	{
-		UWorld* const World = GetWorld();
-		FVector SpawnLocation = GetActorLocation();
-		FRotator SpawnRot(0.0f, GetControlRotation().Yaw, 0.0f);
-		FActorSpawnParameters SpawnParams;
+		if (BP_Dagger != nullptr)
+		{
+			UWorld* const World = GetWorld();
+			FVector SpawnLocation = GetActorLocation();
+			FRotator SpawnRot(0.0f, GetControlRotation().Yaw, 0.0f);
+			FActorSpawnParameters SpawnParams;
 
-		newDagger = World->SpawnActor<ADagger>(BP_Dagger, SpawnLocation, SpawnRot, SpawnParams);
-		DaggerPool.Add(newDagger);
+			newDagger = World->SpawnActor<ADagger>(BP_Dagger, SpawnLocation, SpawnRot, SpawnParams);
+			DaggerPool.Add(newDagger);
+			newDagger->Spawn(this);
+		}
 	}
 
 	return newDagger;
@@ -299,6 +311,8 @@ void AThrowingGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 		EnhancedInputComponent->BindAction(SlideAction, ETriggerEvent::Completed, this, &AThrowingGameCharacter::StopSlide);
 
 		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Triggered, this, &AThrowingGameCharacter::Throw);
+
+		EnhancedInputComponent->BindAction(RefillAction, ETriggerEvent::Triggered, this, &AThrowingGameCharacter::Refill);
 	}
 	else
 	{
@@ -411,7 +425,7 @@ void AThrowingGameCharacter::StopSlide()
 
 void AThrowingGameCharacter::Throw(const FInputActionValue& Value)
 {
-
+	Shoot(); //TODO FIX
 }
 
 void AThrowingGameCharacter::SlideJumpCheck()

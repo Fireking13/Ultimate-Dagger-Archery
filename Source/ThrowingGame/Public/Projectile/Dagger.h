@@ -32,6 +32,9 @@ protected:
 
 	int LocationIndex;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dagger")
+	TSubclassOf<class APlacedDagger> BP_PlacedDagger;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -62,11 +65,15 @@ public:
 
 	void Shoot();
 
-	void Adjust();
+	void FoucedAdjust();
+
+	void Adjust(FVector targetPos);
 
 	void Spawn(class AThrowingGameCharacter* player);
 
 	void Reset(int posNum);
 
 	virtual void DestroyProjectile() override;
+
+	void ResetSpawnLocations();
 };
