@@ -71,19 +71,14 @@ void AThrowingGameCharacter::Tick(float DeltaTime)
 		Sliding(DeltaTime);
 	}
 
-	AdjustTimer += DeltaTime;
+	SetTargetPoint();
 
-	if (AdjustTimer >= AdjustTimerMax)
+	for (ADagger* dagger : DaggersReady)
 	{
-		for (ADagger* dagger: DaggersReady)
+		if (dagger)
 		{
-			if (dagger)
-			{
-				dagger->Adjust();
-			}
+			dagger->Adjust(TargetPoint);
 		}
-
-		AdjustTimer = 0.0f;
 	}
 }
 
@@ -100,7 +95,7 @@ void AThrowingGameCharacter::BeginPlay()
 	OG_JumpHeight = moveComp->JumpZVelocity;
 	OG_Speed = moveComp->MaxWalkSpeed;
 
-
+	Refill();
 }
 
 void AThrowingGameCharacter::RefillDash()
@@ -179,7 +174,7 @@ void AThrowingGameCharacter::Refill()
 
 	int8 index = 0;
 
-	for (bool daggerSpot : DaggerSpots)
+	for (bool& daggerSpot : DaggerSpots)
 	{
 		if (!daggerSpot)
 		{
@@ -196,7 +191,12 @@ void AThrowingGameCharacter::Refill()
 
 void AThrowingGameCharacter::Shoot()
 {
+	DaggersReady[FireIndex]->FoucedAdjust(TargetPoint);
 	DaggersReady[FireIndex]->Shoot();
+
+	DaggersReady[FireIndex] = nullptr;
+
+	DaggerSpots[FireIndex] = false;
 
 	FireIndex++;
 

@@ -32,6 +32,10 @@ protected:
 
 	int LocationIndex;
 
+	float LerpSpeed;
+	
+	float SlerpSpeed;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dagger")
 	TSubclassOf<class APlacedDagger> BP_PlacedDagger;
 
@@ -65,7 +69,7 @@ public:
 
 	void Shoot();
 
-	void FoucedAdjust();
+	void FoucedAdjust(FVector targetPos);
 
 	void Adjust(FVector targetPos);
 
