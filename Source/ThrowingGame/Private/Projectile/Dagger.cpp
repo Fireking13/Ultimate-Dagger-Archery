@@ -36,6 +36,7 @@ ADagger::ADagger()
 	CapsuleComponent->SetupAttachment(SphereComponent);
 
 	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ADagger::OnOverlapBegin);
+	CapsuleComponent->OnComponentHit.AddDynamic(this, &ADagger::OnHit);
 
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	StaticMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
@@ -93,10 +94,6 @@ void ADagger::Tick(float DeltaTime)
 
 void ADagger::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-}
-
-void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
 	if (IsActive)
 	{
 		if (OtherActor->ActorHasTag("Projectile") || OtherActor->ActorHasTag("Projectile Never Hit"))
@@ -104,22 +101,44 @@ void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 			return;
 		}
 
+		DestroyProjectile();
+
 		if (BP_PlacedDagger != nullptr)
 		{
-			FVector hitLocation = SweepResult.ImpactPoint;
-			//FVector newLocation = GetActorLocation() + GetActorForwardVector() * hitLocation;  //hitLocation
-			SetActorLocation(hitLocation);
+			//FVector hitLocation = SweepResult.ImpactPoint;
+			//SetActorLocation(hitLocation);
 
-			//TODO add effect
-
-			FVector SpawnLocation = GetActorLocation();
+			FVector SpawnLocation = Hit.ImpactPoint;
 			FRotator SpawnRot = GetActorRotation();
 			FActorSpawnParameters SpawnParams;
 
 			GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, SpawnLocation, SpawnRot, SpawnParams);
 		}
+	}
+}
+
+void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+ 	if (IsActive)
+	{
+		if (OtherActor->ActorHasTag("Projectile") || OtherActor->ActorHasTag("Projectile Never Hit"))
+		{
+			return;
+		}
 
 		DestroyProjectile();
+
+		if (BP_PlacedDagger != nullptr)
+		{
+			//FVector hitLocation = SweepResult.ImpactPoint;
+			//SetActorLocation(hitLocation);
+
+			FVector SpawnLocation = SweepResult.ImpactPoint;
+			FRotator SpawnRot = GetActorRotation();
+			FActorSpawnParameters SpawnParams;
+
+			GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, SpawnLocation, SpawnRot, SpawnParams);
+		}
 	}
 }
 
@@ -135,27 +154,34 @@ void ADagger::Shoot()
 {
 	HasShoot = true;
 
-	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
+	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Block);
+	CapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECollisionResponse::ECR_Ignore);
 }
 
 void ADagger::FoucedAdjust(FVector targetPos)
 {
-	ResetSpawnLocations();
+	if (IsActive)
+	{
+		ResetSpawnLocations();
 
-	SetActorLocation(SpawnLocations[LocationIndex]);
+		SetActorLocation(SpawnLocations[LocationIndex]);
 
-	FVector direction = (targetPos - GetActorLocation()).GetSafeNormal();
-	SetActorRotation(direction.Rotation());
+		FVector direction = (targetPos - GetActorLocation()).GetSafeNormal();
+		SetActorRotation(direction.Rotation());
+	}
 }
 
 void ADagger::Adjust(FVector targetPos)
 {
-	FVector direction = (targetPos - GetActorLocation()).GetSafeNormal();
+	if (IsActive)
+	{
+		FVector direction = (targetPos - GetActorLocation()).GetSafeNormal();
 
-	FRotator newRotation = FMath::RInterpTo(GetActorRotation(), direction.Rotation(), GetWorld()->GetDeltaSeconds(), SlerpSpeed);
+		FRotator newRotation = FMath::RInterpTo(GetActorRotation(), direction.Rotation(), GetWorld()->GetDeltaSeconds(), SlerpSpeed);
 
-	SetActorRotation(newRotation);
+		SetActorRotation(newRotation);
+	}
 }
 
 void ADagger::Spawn(AThrowingGameCharacter* player)
@@ -192,13 +218,14 @@ void ADagger::DestroyProjectile()
 
 	StaticMeshComponent->SetVisibility(false);
 	StaticMeshComponent->SetHiddenInGame(true);
+
+	ProjectileMovementComponent->Velocity = FVector::ZeroVector;
 }
 
 void ADagger::ResetSpawnLocations()
 {
 	if (PlayerCharacter != nullptr)
 	{
-
 		FVector pos = PlayerCharacter->GetFirstPersonCameraComponent()->GetComponentLocation();
 		FVector forwardVec = PlayerCharacter->GetFirstPersonCameraComponent()->GetForwardVector();
 		FVector rightVec = PlayerCharacter->GetFirstPersonCameraComponent()->GetRightVector();

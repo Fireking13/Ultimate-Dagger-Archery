@@ -40,6 +40,7 @@ APlacedDagger::APlacedDagger()
 	BoxComponent->CanCharacterStepUpOn = ECB_Yes;
 	BoxComponent->SetupAttachment(SphereComponent);
 	
+	Tags.Add(TEXT("Projectile Never Hit"));
 }
 
 // Called when the game starts or when spawned

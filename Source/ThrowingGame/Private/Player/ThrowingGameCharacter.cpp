@@ -60,6 +60,8 @@ AThrowingGameCharacter::AThrowingGameCharacter()
 	{
 		daggerSpot = false;
 	}
+
+	Tags.Add(TEXT("Projectile Never Hit"));
 }
 
 void AThrowingGameCharacter::Tick(float DeltaTime)
@@ -191,18 +193,21 @@ void AThrowingGameCharacter::Refill()
 
 void AThrowingGameCharacter::Shoot()
 {
-	DaggersReady[FireIndex]->FoucedAdjust(TargetPoint);
-	DaggersReady[FireIndex]->Shoot();
-
-	DaggersReady[FireIndex] = nullptr;
-
-	DaggerSpots[FireIndex] = false;
-
-	FireIndex++;
-
-	if (FireIndex > 4)
+	if (DaggersReady[FireIndex])
 	{
-		Refill(); //TDOD: chanage
+		DaggersReady[FireIndex]->FoucedAdjust(TargetPoint);
+		DaggersReady[FireIndex]->Shoot();
+
+		DaggersReady[FireIndex] = nullptr;
+
+		DaggerSpots[FireIndex] = false;
+
+		FireIndex++;
+
+		if (FireIndex > 4)
+		{
+			Refill(); //TDOD: chanage
+		}
 	}
 }
 
