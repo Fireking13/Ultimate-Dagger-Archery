@@ -223,12 +223,11 @@ ADagger* AThrowingGameCharacter::GetDaggerFromPool()
 	{
 		if (BP_Dagger != nullptr)
 		{
-			UWorld* const World = GetWorld();
 			FVector SpawnLocation = GetActorLocation();
 			FRotator SpawnRot(0.0f, GetControlRotation().Yaw, 0.0f);
 			FActorSpawnParameters SpawnParams;
 
-			newDagger = World->SpawnActor<ADagger>(BP_Dagger, SpawnLocation, SpawnRot, SpawnParams);
+			newDagger = GetWorld()->SpawnActor<ADagger>(BP_Dagger, SpawnLocation, SpawnRot, SpawnParams);
 			DaggerPool.Add(newDagger);
 			newDagger->Spawn(this);
 		}

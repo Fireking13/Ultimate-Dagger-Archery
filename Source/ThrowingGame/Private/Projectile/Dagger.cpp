@@ -16,7 +16,7 @@ ADagger::ADagger()
 	SphereComponent->SetNotifyRigidBodyCollision(true);
 	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SphereComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-	SphereComponent->SetGenerateOverlapEvents(true);
+	SphereComponent->SetGenerateOverlapEvents(false);
 	SphereComponent->SetSimulatePhysics(false);
 	SphereComponent->SetEnableGravity(false);
 	SphereComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
@@ -34,6 +34,8 @@ ADagger::ADagger()
 	CapsuleComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CapsuleComponent->CanCharacterStepUpOn = ECB_No;
 	CapsuleComponent->SetupAttachment(SphereComponent);
+
+	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ADagger::OnOverlapBegin);
 
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	StaticMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
@@ -91,26 +93,38 @@ void ADagger::Tick(float DeltaTime)
 
 void ADagger::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (!IsActive)
-	{
-
-	}
 }
 
 void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!IsActive)
+	if (IsActive)
 	{
+		if (OtherActor->ActorHasTag("Projectile") || OtherActor->ActorHasTag("Projectile Never Hit"))
+		{
+			return;
+		}
 
+		if (BP_PlacedDagger != nullptr)
+		{
+			FVector hitLocation = SweepResult.ImpactPoint;
+			//FVector newLocation = GetActorLocation() + GetActorForwardVector() * hitLocation;  //hitLocation
+			SetActorLocation(hitLocation);
+
+			//TODO add effect
+
+			FVector SpawnLocation = GetActorLocation();
+			FRotator SpawnRot = GetActorRotation();
+			FActorSpawnParameters SpawnParams;
+
+			GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, SpawnLocation, SpawnRot, SpawnParams);
+		}
+
+		DestroyProjectile();
 	}
 }
 
 void ADagger::OnOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!IsActive)
-	{
-
-	}
 }
 
 void ADagger::InitializeStats()
@@ -162,6 +176,9 @@ void ADagger::Reset(int posNum)
 
 		CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+		StaticMeshComponent->SetVisibility(true);
+		StaticMeshComponent->SetHiddenInGame(false);
 	}
 }
 
@@ -169,6 +186,12 @@ void ADagger::DestroyProjectile()
 {
 	IsActive = false;
 	HasShoot = false;
+
+	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+	StaticMeshComponent->SetVisibility(false);
+	StaticMeshComponent->SetHiddenInGame(true);
 }
 
 void ADagger::ResetSpawnLocations()

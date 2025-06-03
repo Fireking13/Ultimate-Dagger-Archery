@@ -23,6 +23,9 @@ protected:
 	class UBoxComponent* BoxComponent;
 
 	UPROPERTY(EditAnywhere)
+	class USphereComponent* SphereComponent;
+
+	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* StaticMeshComponent;
 
 public:	
