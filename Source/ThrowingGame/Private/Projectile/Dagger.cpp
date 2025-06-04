@@ -7,6 +7,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Player/ThrowingGameCharacter.h"
 #include "PlacedDagger.h"
+#include "Math/UnrealMathUtility.h"
 
 ADagger::ADagger()
 {
@@ -36,7 +37,7 @@ ADagger::ADagger()
 	CapsuleComponent->SetupAttachment(SphereComponent);
 
 	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ADagger::OnOverlapBegin);
-	CapsuleComponent->OnComponentHit.AddDynamic(this, &ADagger::OnHit);
+	//CapsuleComponent->OnComponentHit.AddDynamic(this, &ADagger::OnHit);
 
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	StaticMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
@@ -61,6 +62,13 @@ ADagger::ADagger()
 
 	LerpSpeed = 20.0f;
 	SlerpSpeed = 20.0f;
+
+	SpinSpeed = 0.f;
+	MaxSpinSpeed = 1000.0f;
+	MinSpinSpeed = 100.0f;
+	SpinDir = 1;
+
+	InWall = false;
 }
 
 void ADagger::BeginPlay()
@@ -77,6 +85,8 @@ void ADagger::Tick(float DeltaTime)
 		if (HasShoot)
 		{
 			ProjectileMovementComponent->Velocity = GetActorForwardVector() * Speed;
+
+			//SetActorRelativeRotation();
 		}
 		else
 		{
@@ -93,7 +103,7 @@ void ADagger::Tick(float DeltaTime)
 }
 
 void ADagger::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
+{/*
 	if (IsActive)
 	{
 		if (OtherActor->ActorHasTag("Projectile") || OtherActor->ActorHasTag("Projectile Never Hit"))
@@ -114,8 +124,11 @@ void ADagger::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitive
 
 			GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, SpawnLocation, SpawnRot, SpawnParams);
 		}
-	}
+	}*/
 }
+
+//FVector hitLocation = SweepResult.ImpactPoint;
+			//SetActorLocation(hitLocation);
 
 void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -130,14 +143,16 @@ void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 
 		if (BP_PlacedDagger != nullptr)
 		{
-			//FVector hitLocation = SweepResult.ImpactPoint;
-			//SetActorLocation(hitLocation);
+			FVector ClosestPoint;
+			OtherComp->GetClosestPointOnCollision(GetActorLocation(), ClosestPoint);
+			FVector SpawnLocation = ClosestPoint;
 
-			FVector SpawnLocation = SweepResult.ImpactPoint;
+			//FVector SpawnLocation = SweepResult.ImpactPoint; //find where it hit the wall
 			FRotator SpawnRot = GetActorRotation();
 			FActorSpawnParameters SpawnParams;
 
-			GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, SpawnLocation, SpawnRot, SpawnParams);
+			APlacedDagger* placedDagger = GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, SpawnLocation, SpawnRot, SpawnParams);
+			placedDagger->AdjustHitBox();
 		}
 	}
 }
@@ -155,8 +170,14 @@ void ADagger::Shoot()
 	HasShoot = true;
 
 	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Block);
+	CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
 	CapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECollisionResponse::ECR_Ignore);
+
+	SpinSpeed = FMath::FRandRange(MinSpinSpeed, MaxSpinSpeed);
+
+	int8 num = FMath::RandRange(0, 1);
+
+	SpinDir = (num > 0) ? 1 : -1;
 }
 
 void ADagger::FoucedAdjust(FVector targetPos)
@@ -212,6 +233,7 @@ void ADagger::DestroyProjectile()
 {
 	IsActive = false;
 	HasShoot = false;
+	InWall = false;
 
 	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Ignore);

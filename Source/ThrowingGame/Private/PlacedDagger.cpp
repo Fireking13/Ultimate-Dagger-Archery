@@ -27,16 +27,17 @@ APlacedDagger::APlacedDagger()
 	StaticMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	StaticMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 	StaticMeshComponent->SetupAttachment(SphereComponent);
 	
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	BoxComponent->SetNotifyRigidBodyCollision(true);
-	BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	BoxComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	BoxComponent->SetCollisionResponseToAllChannels(ECR_Block);
 	BoxComponent->SetGenerateOverlapEvents(true);
 	BoxComponent->SetSimulatePhysics(false);
 	BoxComponent->SetEnableGravity(false);
-	BoxComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
+	BoxComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Default, 1.f));
 	BoxComponent->CanCharacterStepUpOn = ECB_Yes;
 	BoxComponent->SetupAttachment(SphereComponent);
 	
@@ -55,5 +56,14 @@ void APlacedDagger::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void APlacedDagger::AdjustHitBox()
+{
+	FRotator currentRot = BoxComponent->GetRelativeRotation();
+
+	FRotator correctedRot = FRotator(0.f, currentRot.Yaw, currentRot.Roll);
+
+	BoxComponent->SetRelativeRotation(correctedRot);
 }
 

@@ -30,11 +30,18 @@ protected:
 
 	TArray<FVector> SpawnLocations;
 
-	int LocationIndex;
+	int8 LocationIndex;
 
 	float LerpSpeed;
 	
 	float SlerpSpeed;
+
+	float SpinSpeed;
+	float MaxSpinSpeed;
+	float MinSpinSpeed;
+	int8 SpinDir;
+
+	bool InWall;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dagger")
 	TSubclassOf<class APlacedDagger> BP_PlacedDagger;
