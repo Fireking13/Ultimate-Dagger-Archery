@@ -58,12 +58,14 @@ void APlacedDagger::Tick(float DeltaTime)
 
 }
 
-void APlacedDagger::AdjustHitBox()
+void APlacedDagger::AdjustHitBox(FRotator MeshRot)
 {
 	FRotator currentRot = BoxComponent->GetRelativeRotation();
 
 	FRotator correctedRot = FRotator(0.f, currentRot.Yaw, currentRot.Roll);
 
 	BoxComponent->SetRelativeRotation(correctedRot);
+
+	StaticMeshComponent->SetWorldRotation(MeshRot);
 }
 

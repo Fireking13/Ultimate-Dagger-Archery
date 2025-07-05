@@ -3,6 +3,7 @@
 #include "Projectile/Dagger.h"
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Player/ThrowingGameCharacter.h"
@@ -12,8 +13,8 @@
 ADagger::ADagger()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
-	SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+	
+	/*SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	SphereComponent->SetNotifyRigidBodyCollision(true);
 	SphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SphereComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -22,9 +23,11 @@ ADagger::ADagger()
 	SphereComponent->SetEnableGravity(false);
 	SphereComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	SphereComponent->CanCharacterStepUpOn = ECB_No;
+	
+	
+	RootComponent = SphereComponent;*/
 
-	RootComponent = SphereComponent;
-
+	/*
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComponent"));
 	CapsuleComponent->SetNotifyRigidBodyCollision(true);
 	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -34,26 +37,40 @@ ADagger::ADagger()
 	CapsuleComponent->SetEnableGravity(false);
 	CapsuleComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	CapsuleComponent->CanCharacterStepUpOn = ECB_No;
-	CapsuleComponent->SetupAttachment(SphereComponent);
+	//CapsuleComponent->SetWorldRotation(FRotator(0.f, -90.f, 0.f));*/
 
-	CapsuleComponent->OnComponentBeginOverlap.AddDynamic(this, &ADagger::OnOverlapBegin);
+	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
+	BoxComponent->SetNotifyRigidBodyCollision(true);
+	BoxComponent->SetBoxExtent(FVector(60.f, 7.5f, 7.5f));
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BoxComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	BoxComponent->SetGenerateOverlapEvents(true);
+	BoxComponent->SetSimulatePhysics(false);
+	BoxComponent->SetEnableGravity(false);
+	BoxComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
+	BoxComponent->CanCharacterStepUpOn = ECB_No;
+
+	RootComponent = BoxComponent;
+
+	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ADagger::OnOverlapBegin);
 	//CapsuleComponent->OnComponentHit.AddDynamic(this, &ADagger::OnHit);
 
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComponent"));
 	StaticMeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	StaticMeshComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	StaticMeshComponent->SetupAttachment(SphereComponent);
+	StaticMeshComponent->SetupAttachment(BoxComponent);
 
 	StaticMeshComponent->SetCastShadow(false);
 	StaticMeshComponent->bCastDynamicShadow = false;
 	StaticMeshComponent->bCastStaticShadow = false;
 
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
-	ProjectileMovementComponent->SetUpdatedComponent(SphereComponent);
+	ProjectileMovementComponent->SetUpdatedComponent(BoxComponent);
 	ProjectileMovementComponent->bRotationFollowsVelocity = true;
 	ProjectileMovementComponent->bShouldBounce = false;
 	ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
+	ProjectileMovementComponent->bSweepCollision = true;
 
 	IsActive = false;
 	HasShoot = false;
@@ -84,9 +101,8 @@ void ADagger::Tick(float DeltaTime)
 	{
 		if (HasShoot)
 		{
-			ProjectileMovementComponent->Velocity = GetActorForwardVector() * Speed;
-
-			//SetActorRelativeRotation();
+			FRotator SpinRotation = FRotator(SpinSpeed * DeltaTime * SpinDir, 0.f, 0.f);
+			StaticMeshComponent->AddLocalRotation(SpinRotation);
 		}
 		else
 		{
@@ -103,28 +119,8 @@ void ADagger::Tick(float DeltaTime)
 }
 
 void ADagger::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{/*
-	if (IsActive)
-	{
-		if (OtherActor->ActorHasTag("Projectile") || OtherActor->ActorHasTag("Projectile Never Hit"))
-		{
-			return;
-		}
+{
 
-		DestroyProjectile();
-
-		if (BP_PlacedDagger != nullptr)
-		{
-			//FVector hitLocation = SweepResult.ImpactPoint;
-			//SetActorLocation(hitLocation);
-
-			FVector SpawnLocation = Hit.ImpactPoint;
-			FRotator SpawnRot = GetActorRotation();
-			FActorSpawnParameters SpawnParams;
-
-			GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, SpawnLocation, SpawnRot, SpawnParams);
-		}
-	}*/
 }
 
 //FVector hitLocation = SweepResult.ImpactPoint;
@@ -143,16 +139,43 @@ void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 
 		if (BP_PlacedDagger != nullptr)
 		{
-			FVector ClosestPoint;
-			OtherComp->GetClosestPointOnCollision(GetActorLocation(), ClosestPoint);
-			FVector SpawnLocation = ClosestPoint;
+			FVector spawnLocation;
+			FVector start = GetActorLocation();
+			FVector end = start + (GetActorForwardVector() * 100.0f);
 
-			//FVector SpawnLocation = SweepResult.ImpactPoint; //find where it hit the wall
-			FRotator SpawnRot = GetActorRotation();
-			FActorSpawnParameters SpawnParams;
+			TArray<FHitResult> hitResults;
+			FCollisionObjectQueryParams ObjectQueryParams;
+			ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldStatic);
+			ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic); 
 
-			APlacedDagger* placedDagger = GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, SpawnLocation, SpawnRot, SpawnParams);
-			placedDagger->AdjustHitBox();
+			bool bHit = GetWorld()->LineTraceMultiByObjectType(hitResults, start, end, ObjectQueryParams);
+			bool bValidHit = false;
+
+			for (FHitResult& hit : hitResults)
+			{
+				AActor* hitActor = hit.GetActor();
+
+				if (hitActor->ActorHasTag("Projectile") || hitActor->ActorHasTag("Projectile Never Hit"))
+				{
+					continue;
+				}
+
+				spawnLocation = hit.Location;
+				bValidHit = true;
+				break;
+			}
+
+			if(!bValidHit)
+			{
+				spawnLocation = SweepResult.ImpactPoint;
+			}
+
+			FRotator spawnRot = GetActorRotation();
+			FActorSpawnParameters spawnParams;
+
+			APlacedDagger* placedDagger = GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, spawnLocation, spawnRot, spawnParams);
+			placedDagger->AdjustHitBox(StaticMeshComponent->GetComponentRotation());
+			placedDagger->AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
 		}
 	}
 }
@@ -169,9 +192,12 @@ void ADagger::Shoot()
 {
 	HasShoot = true;
 
-	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
-	CapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, ECollisionResponse::ECR_Ignore);
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	BoxComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
+	BoxComponent->SetCollisionResponseToChannel(ECC_Pawn, ECollisionResponse::ECR_Ignore);
+
+	ProjectileMovementComponent->Velocity = GetActorForwardVector() * Speed;
+	ProjectileMovementComponent->Activate(true);
 
 	SpinSpeed = FMath::FRandRange(MinSpinSpeed, MaxSpinSpeed);
 
@@ -221,11 +247,16 @@ void ADagger::Reset(int posNum)
 		SetActorLocation(PlayerCharacter->GetActorLocation());
 		SetActorRotation(FRotator(0.0f, PlayerCharacter->GetControlRotation().Yaw, 0.0f));
 
-		CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+		BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		BoxComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 
 		StaticMeshComponent->SetVisibility(true);
 		StaticMeshComponent->SetHiddenInGame(false);
+		//StaticMeshComponent->SetWorldRotation(GetActorRotation()); testing
+
+		Speed = 5000.0f;
+
+		ProjectileMovementComponent->Activate(true);
 	}
 }
 
@@ -235,13 +266,14 @@ void ADagger::DestroyProjectile()
 	HasShoot = false;
 	InWall = false;
 
-	CapsuleComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	CapsuleComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BoxComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 
 	StaticMeshComponent->SetVisibility(false);
 	StaticMeshComponent->SetHiddenInGame(true);
 
 	ProjectileMovementComponent->Velocity = FVector::ZeroVector;
+	Speed = 0.0f;
 }
 
 void ADagger::ResetSpawnLocations()
