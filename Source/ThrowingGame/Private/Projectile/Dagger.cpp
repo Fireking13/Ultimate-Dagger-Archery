@@ -7,8 +7,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Player/ThrowingGameCharacter.h"
-#include "PlacedDagger.h"
+#include "WorldActors/Static/PlacedDagger.h"
 #include "Math/UnrealMathUtility.h"
+#include "WorldActors/Interactable/Targets/BaseTarget.h"
 
 ADagger::ADagger()
 {
@@ -86,6 +87,8 @@ ADagger::ADagger()
 	SpinDir = 1;
 
 	InWall = false;
+	
+	Tags.Add(TEXT("Dagger"));
 }
 
 void ADagger::BeginPlay()
@@ -135,6 +138,16 @@ void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 			return;
 		}
 
+		if (OtherActor->ActorHasTag("Target"))
+		{
+			ABaseTarget* Target = Cast<ABaseTarget>(OtherActor);
+
+			if (Target)
+			{
+				Target->HitCheck(this);
+			}
+		}
+		
 		DestroyProjectile();
 
 		if (BP_PlacedDagger != nullptr)
