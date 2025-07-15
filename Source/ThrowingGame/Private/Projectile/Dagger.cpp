@@ -137,22 +137,12 @@ void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 		{
 			return;
 		}
-
-		if (OtherActor->ActorHasTag("Target"))
-		{
-			ABaseTarget* Target = Cast<ABaseTarget>(OtherActor);
-
-			if (Target)
-			{
-				Target->HitCheck(this);
-			}
-		}
 		
 		DestroyProjectile();
 
+		FVector spawnLocation;
 		if (BP_PlacedDagger != nullptr)
 		{
-			FVector spawnLocation;
 			FVector start = GetActorLocation();
 			FVector end = start + (GetActorForwardVector() * 100.0f);
 
@@ -189,6 +179,16 @@ void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 			APlacedDagger* placedDagger = GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, spawnLocation, spawnRot, spawnParams);
 			placedDagger->AdjustHitBox(StaticMeshComponent->GetComponentRotation());
 			placedDagger->AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
+		}
+
+		if (OtherActor->ActorHasTag("Target"))
+		{
+			ABaseTarget* Target = Cast<ABaseTarget>(OtherActor);
+
+			if (Target)
+			{
+				Target->HitCheck(this, spawnLocation);
+			}
 		}
 	}
 }

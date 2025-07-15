@@ -34,10 +34,25 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
 	float HitAngle;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
+	float RingSpace;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
+	FVector CenterPoint;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
+	float MaxPoints;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
+	int32 RingNum;
+
 protected:
 
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* StaticMeshComponent;
+
+	UPROPERTY(EditAnywhere)
+	class USphereComponent* TestSphereComponent;
 	
 public:	
 	// Called every frame
@@ -56,7 +71,9 @@ public:
 
 	//void Reset();
 
-	void HitCheck(AActor* dagger);
+	void HitCheck(AActor* dagger, FVector HitPoint);
 
-	void SendPoints(int32 num);
+	void CalculatePoints(float dis);
+
+	void SendPoints(float num);
 };

@@ -2,6 +2,8 @@
 
 #include "WorldActors/Interactable/Targets/BaseTarget.h"
 #include "Projectile/Dagger.h"
+#include "Components/SphereComponent.h"
+#include "Math/UnrealMathUtility.h"
 
 // Sets default values
 ABaseTarget::ABaseTarget()
@@ -18,7 +20,21 @@ ABaseTarget::ABaseTarget()
 	StaticMeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
 	StaticMeshComponent->SetupAttachment(RootComponent);
 
-	HitAngle = -0.9f;
+
+	/*TestSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("TestSphereComponent"));
+	TestSphereComponent->SetNotifyRigidBodyCollision(true);
+	TestSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	TestSphereComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	TestSphereComponent->SetGenerateOverlapEvents(false);
+	TestSphereComponent->SetSimulatePhysics(false);
+	TestSphereComponent->SetEnableGravity(false);
+	TestSphereComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
+	TestSphereComponent->CanCharacterStepUpOn = ECB_No;*/
+
+	HitAngle = -0.15f;
+	RingSpace = 18.f; 
+	MaxPoints = 100.f; 
+	RingNum = 5;
 
 	Tags.Add(TEXT("Target"));
 
@@ -46,8 +62,12 @@ void ABaseTarget::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 	}*/
 }
 
-void ABaseTarget::HitCheck(AActor* dagger)
+void ABaseTarget::HitCheck(AActor* dagger, FVector HitPoint)
 {
+	FVector OffSet = FVector(0.f, -1.0f, 97.0f);
+	FVector LocalOffset = GetActorTransform().TransformVector(OffSet);
+	CenterPoint = GetActorLocation() + LocalOffset;
+
 	FVector forward = GetActorForwardVector();
 	FVector daggerForward = dagger->GetActorForwardVector();
 
@@ -55,15 +75,37 @@ void ABaseTarget::HitCheck(AActor* dagger)
 
 	if (dot < HitAngle)
 	{
-		SendPoints(1); //TODO: remove place holder
+		float dis = FVector::Dist(HitPoint, CenterPoint);
+
+		CalculatePoints(dis);
 	}
 	else
 	{
-		SendPoints(0);
+		SendPoints(0.f);
 	}
 }
 
-void ABaseTarget::SendPoints(int32 num)
+void ABaseTarget::CalculatePoints(float dis)
 {
+	float points = MaxPoints;
+
+	for (int32 i = 0; i < RingNum; i++)
+	{
+		if (dis < RingSpace + (RingSpace * i) + 1)
+		{
+			break;
+		}
+
+		points -= MaxPoints / 4;
+
+		points = FMath::Clamp(points, MaxPoints / 10, MaxPoints);
+	}
+
+	SendPoints(points);
+}
+
+void ABaseTarget::SendPoints(float num)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Points = %f"), num);
 }
 
