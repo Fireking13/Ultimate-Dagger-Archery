@@ -31,6 +31,7 @@ ABaseTarget::ABaseTarget()
 	TestSphereComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	TestSphereComponent->CanCharacterStepUpOn = ECB_No;*/
 
+	IsActive = true;
 	HitAngle = -0.15f;
 	RingSpace = 18.f; 
 	MaxPoints = 100.f; 

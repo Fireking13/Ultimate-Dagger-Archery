@@ -19,8 +19,23 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	bool isNotDone;
+
+	//UPROPERTY(EditDefaultsOnly, Category = "ArtifactMissionClass")
+	//TSubclassOf<class AArtifactMission> GroundMission;
+
+	//UPROPERTY(EditDefaultsOnly, Category = "FixingMissionClass")
+	//TSubclassOf<class AFixingMission> AirMission;
+
+	//UPROPERTY(EditDefaultsOnly, Category = "FixingMissionClass")
+	//TSubclassOf<class AFixingMission> MovingSplineMission;
+
+	//UPROPERTY(EditDefaultsOnly, Category = "FixingMissionClass")
+	//TSubclassOf<class AFixingMission> MovingSideToSideMission;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void startUp(FVector pos);
 };

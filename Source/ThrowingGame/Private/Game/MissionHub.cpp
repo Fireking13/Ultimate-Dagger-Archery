@@ -2,6 +2,8 @@
 
 
 #include "Game/MissionHub.h"
+#include "Game/MissionPoint.h"
+#include "Math/UnrealMathUtility.h"
 
 // Sets default values
 AMissionHub::AMissionHub()
@@ -25,3 +27,15 @@ void AMissionHub::Tick(float DeltaTime)
 
 }
 
+void AMissionHub::Start()
+{
+	for (int32 i = 0; i < NumActiveMissions; i++)
+	{
+
+	}
+}
+
+void AMissionHub::Start()
+{
+
+}
