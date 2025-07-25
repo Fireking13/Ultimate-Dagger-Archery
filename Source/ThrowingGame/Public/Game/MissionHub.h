@@ -24,6 +24,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "MissionHub", meta = (EditCondition = "Point Locations"))
 	TArray<AMissionPoint*> m_Missions;
 
+	TArray<AMissionPoint*> m_MissionsActive;
+
 	UPROPERTY(EditInstanceOnly, Category = "MissionHub", meta = (EditCondition = "Point Locations"))
 	TArray<AActor*> PointsLoc;
 
@@ -34,11 +36,17 @@ protected:
 
 	bool IsActive;
 
+	TArray<int32> AvailablePoints;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void Start();
+	void StartUp();
 
-	void SetIsActive();
+	void SetIsActive(bool val);
+
+	//void PointDone();
+
+	void ReactivatePoint();
 };

@@ -6,6 +6,16 @@
 #include "GameFramework/Actor.h"
 #include "MissionPoint.generated.h"
 
+UENUM(BlueprintType)
+enum class EMissionTypes : uint8
+{
+	GROUND	UMETA(DisplayName = "Ground"),
+	AIR		UMETA(DisplayName = "Air"),
+	SPLINE	UMETA(DisplayName = "MovingSpline"),
+	SIDE	UMETA(DisplayName = "MovingSideToSide")
+};
+
+
 UCLASS()
 class THROWINGGAME_API AMissionPoint : public AActor
 {
@@ -19,23 +29,30 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	bool isNotDone;
+	bool IsActive;
 
-	//UPROPERTY(EditDefaultsOnly, Category = "ArtifactMissionClass")
-	//TSubclassOf<class AArtifactMission> GroundMission;
+	class AMissionBase* m_Mission;
 
-	//UPROPERTY(EditDefaultsOnly, Category = "FixingMissionClass")
-	//TSubclassOf<class AFixingMission> AirMission;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
+	EMissionTypes m_MissionType;
 
-	//UPROPERTY(EditDefaultsOnly, Category = "FixingMissionClass")
-	//TSubclassOf<class AFixingMission> MovingSplineMission;
+	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
+	TSubclassOf<class AMissionGround> GroundMission;
 
-	//UPROPERTY(EditDefaultsOnly, Category = "FixingMissionClass")
-	//TSubclassOf<class AFixingMission> MovingSideToSideMission;
+	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
+	TSubclassOf<class AMissionAir> AirMission;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
+	TSubclassOf<class AMissionSpline> MovingSplineMission;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
+	TSubclassOf<class AMissionSideToSide> MovingSideToSideMission;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void startUp(FVector pos);
+	void StartUp();
+
+	bool GetIsActive();
 };

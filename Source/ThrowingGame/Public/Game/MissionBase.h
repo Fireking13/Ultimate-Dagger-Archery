@@ -21,11 +21,9 @@ protected:
 
 	bool isNotDone;
 
-
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void Create(FVector pos);
+	//virtual void StartUp(FVector pos);
 };
