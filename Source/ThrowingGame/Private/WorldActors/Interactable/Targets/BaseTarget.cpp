@@ -31,7 +31,7 @@ ABaseTarget::ABaseTarget()
 	TestSphereComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Unwalkable, 0.f));
 	TestSphereComponent->CanCharacterStepUpOn = ECB_No;*/
 
-	IsActive = true;
+	IsActive = true; //TODO change
 	HitAngle = -0.15f;
 	RingSpace = 18.f; 
 	MaxPoints = 100.f; 
@@ -61,6 +61,43 @@ void ABaseTarget::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Ot
 	{
 
 	}*/
+}
+
+void ABaseTarget::Spawn(FVector loc, FRotator rot)
+{
+	Reset();
+
+	SetActorLocation(loc);
+	StaticMeshComponent->SetRelativeRotation(rot);
+}
+
+void ABaseTarget::Reset()
+{
+	IsActive = true;
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	StaticMeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
+
+	StaticMeshComponent->SetVisibility(true);
+	StaticMeshComponent->SetHiddenInGame(false);
+
+	StaticMeshComponent->SetCastShadow(true);
+	StaticMeshComponent->bCastDynamicShadow = true;
+	StaticMeshComponent->bCastStaticShadow = true;
+}
+
+void ABaseTarget::Deactivate()
+{
+	IsActive = true;
+
+	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+
+	StaticMeshComponent->SetVisibility(false);
+	StaticMeshComponent->SetHiddenInGame(true);
+
+	StaticMeshComponent->SetCastShadow(false);
+	StaticMeshComponent->bCastDynamicShadow = false;
+	StaticMeshComponent->bCastStaticShadow = false;
 }
 
 void ABaseTarget::HitCheck(AActor* dagger, FVector HitPoint)
@@ -108,5 +145,10 @@ void ABaseTarget::CalculatePoints(float dis)
 void ABaseTarget::SendPoints(float num)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Points = %f"), num);
+}
+
+bool ABaseTarget::GetIsActive()
+{
+	return IsActive;
 }
 

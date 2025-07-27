@@ -67,13 +67,17 @@ public:
 		bool bFromSweep,
 		const FHitResult& SweepResult);
 
-	//void Spawn();
+	virtual void Spawn(FVector loc, FRotator rot);
 
-	//void Reset();
+	virtual void Reset();
+
+	virtual void Deactivate();
 
 	void HitCheck(AActor* dagger, FVector HitPoint);
 
 	void CalculatePoints(float dis);
 
 	void SendPoints(float num);
+
+	bool GetIsActive();
 };

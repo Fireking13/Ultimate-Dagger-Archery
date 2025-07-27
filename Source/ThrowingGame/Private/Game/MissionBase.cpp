@@ -25,3 +25,7 @@ void AMissionBase::Tick(float DeltaTime)
 
 }
 
+void AMissionBase::StartUp(FVector pos)
+{
+}
+

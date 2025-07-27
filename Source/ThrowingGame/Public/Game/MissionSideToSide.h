@@ -14,4 +14,25 @@ class THROWINGGAME_API AMissionSideToSide : public AMissionBase
 {
 	GENERATED_BODY()
 	
+public:
+	// Sets default values for this actor's properties
+	AMissionSideToSide();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
+	FVector Point1;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
+	FVector Point2;
+
+	//might change to an tarray for more points TODO: think about it
+
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void StartUp(FVector pos) override;
 };

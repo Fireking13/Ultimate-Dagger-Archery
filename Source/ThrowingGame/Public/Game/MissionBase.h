@@ -21,9 +21,11 @@ protected:
 
 	bool isNotDone;
 
+	class ABaseTarget* m_Target;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	//virtual void StartUp(FVector pos);
+	virtual void StartUp(FVector pos);
 };
