@@ -36,6 +36,7 @@ ABaseTarget::ABaseTarget()
 	RingSpace = 18.f; 
 	MaxPoints = 100.f; 
 	RingNum = 5;
+	Health = 3;
 
 	Tags.Add(TEXT("Target"));
 
@@ -46,6 +47,7 @@ void ABaseTarget::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	GetWorldTimerManager().SetTimer(Destroy_TimerHandle, this, &ABaseTarget::Deactivate, LifeSpan, false);
 }
 
 // Called every frame
@@ -55,13 +57,13 @@ void ABaseTarget::Tick(float DeltaTime)
 
 }
 
-void ABaseTarget::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+/*void ABaseTarget::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	/*if (OtherActor->IsA(ADagger::StaticClass())) // 
+	if (OtherActor->IsA(ADagger::StaticClass())) // 
 	{
 
-	}*/
-}
+	}
+}*/
 
 void ABaseTarget::Spawn(FVector loc, FRotator rot)
 {
@@ -69,6 +71,8 @@ void ABaseTarget::Spawn(FVector loc, FRotator rot)
 
 	SetActorLocation(loc);
 	StaticMeshComponent->SetRelativeRotation(rot);
+
+	GetWorldTimerManager().SetTimer(Destroy_TimerHandle, this, &ABaseTarget::Deactivate, LifeSpan, false);
 }
 
 void ABaseTarget::Reset()
@@ -87,7 +91,7 @@ void ABaseTarget::Reset()
 
 void ABaseTarget::Deactivate()
 {
-	IsActive = true;
+	IsActive = false;
 
 	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -98,6 +102,11 @@ void ABaseTarget::Deactivate()
 	StaticMeshComponent->SetCastShadow(false);
 	StaticMeshComponent->bCastDynamicShadow = false;
 	StaticMeshComponent->bCastStaticShadow = false;
+
+	GetWorld()->GetTimerManager().ClearTimer(Destroy_TimerHandle);
+
+	OnTargetDeactivation.Broadcast();
+	OnTargetDeactivation.Clear();
 }
 
 void ABaseTarget::HitCheck(AActor* dagger, FVector HitPoint)
@@ -116,6 +125,12 @@ void ABaseTarget::HitCheck(AActor* dagger, FVector HitPoint)
 		float dis = FVector::Dist(HitPoint, CenterPoint);
 
 		CalculatePoints(dis);
+		Health--;
+
+		if (Health <= 0)
+		{
+			Deactivate();
+		}
 	}
 	else
 	{
@@ -150,5 +165,10 @@ void ABaseTarget::SendPoints(float num)
 bool ABaseTarget::GetIsActive()
 {
 	return IsActive;
+}
+
+void ABaseTarget::LifeSpanCheck(float deltaTime)
+{
+
 }
 

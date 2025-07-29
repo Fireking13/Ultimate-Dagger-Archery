@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "BaseTarget.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTargetDeactivation);
+
 UCLASS()
 class THROWINGGAME_API ABaseTarget : public AActor
 {
@@ -46,6 +48,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
 	int32 RingNum;
 
+	UPROPERTY(BlueprintAssignable, Category = "Target Properties")
+	FOnTargetDeactivation OnTargetDeactivation;
+
 protected:
 
 	UPROPERTY(EditAnywhere)
@@ -58,6 +63,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	/*
 	UFUNCTION()
 	virtual void OnOverlapBegin(
 		UPrimitiveComponent* OverlappedComp,
@@ -65,7 +71,7 @@ public:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex,
 		bool bFromSweep,
-		const FHitResult& SweepResult);
+		const FHitResult& SweepResult);*/
 
 	virtual void Spawn(FVector loc, FRotator rot);
 
@@ -80,4 +86,9 @@ public:
 	void SendPoints(float num);
 
 	bool GetIsActive();
+
+	FOnTargetDeactivation& GetTargetHandler() { return OnTargetDeactivation; };
+
+protected:
+	void LifeSpanCheck(float deltaTime);
 };

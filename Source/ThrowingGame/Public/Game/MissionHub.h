@@ -38,6 +38,9 @@ protected:
 
 	TArray<int32> AvailablePoints;
 
+	UFUNCTION()
+	void FOnMissionPointCompleteHandler();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

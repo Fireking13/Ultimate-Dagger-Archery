@@ -28,5 +28,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void StartUp(FVector pos) override;
+	virtual void StartUp(TArray<FVector> points) override;
 };

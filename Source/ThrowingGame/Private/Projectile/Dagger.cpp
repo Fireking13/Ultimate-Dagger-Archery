@@ -305,5 +305,7 @@ void ADagger::ResetSpawnLocations()
 		SpawnLocations.Add(pos + upVec * (100.0f - 20) + forwardVec * 35);
 		SpawnLocations.Add(pos + upVec * (59.04f - 20) + rightVec * 64.0f + forwardVec * 35);
 		SpawnLocations.Add(pos + upVec * -20 + rightVec * 100.0f + forwardVec * 35);
+
+		//TODO: fix this you dumb dumb
 	}
 }

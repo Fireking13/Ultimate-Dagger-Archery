@@ -8,7 +8,7 @@
 
 class ABaseTarget;
 class ASplineTarget;
-//class ASideToSideTarget;
+class ASideToSideTarget;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class THROWINGGAME_API UTargetObjectPoolComponent : public UActorComponent
@@ -27,7 +27,7 @@ protected:
 
 	TArray<ASplineTarget*> m_SplineTargetPool;
 
-	//TArray<ASideToSideTarget*> m_SideToSideTargetPool;
+	TArray<ASideToSideTarget*> m_SideToSideTargetPool;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Target Pool Properties")
 	TSubclassOf<ABaseTarget> BP_BaseTarget;
@@ -35,8 +35,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Target Pool Properties")
 	TSubclassOf<ASplineTarget> BP_SplineTarget;
 
-	//UPROPERTY(EditDefaultsOnly, Category = "Target Pool Properties")
-	//TSubclassOf<ASideToSideTarget> SideToSideTargetClass;
+	UPROPERTY(EditDefaultsOnly, Category = "Target Pool Properties")
+	TSubclassOf<ASideToSideTarget> BP_SideToSideTarget;
 
 public:	
 	// Called every frame
@@ -46,5 +46,5 @@ public:
 
 	ASplineTarget* GetASplineTarget();
 
-	//ASideToSideTarget* GetASideToSideTarget();
+	ASideToSideTarget* GetASideToSideTarget();
 };

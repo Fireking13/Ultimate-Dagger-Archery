@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "MissionBase.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMissionComplete);
+
 UCLASS()
 class THROWINGGAME_API AMissionBase : public AActor
 {
@@ -23,9 +25,17 @@ protected:
 
 	class ABaseTarget* m_Target;
 
+	UFUNCTION()
+	void FOnTargetDeactivationHandler();
+	
+	UPROPERTY(BlueprintAssignable, Category = "Mission Properties");
+	FOnMissionComplete OnMissionComplete;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void StartUp(FVector pos);
+	virtual void StartUp(TArray<FVector> points);
+
+	FOnMissionComplete& GetMissionHandler() { return OnMissionComplete; };
 };

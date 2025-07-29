@@ -21,7 +21,7 @@ void AMissionAir::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AMissionAir::StartUp(FVector pos)
+void AMissionAir::StartUp(TArray<FVector> points)
 {
 	AGameStateBase* baseGameState = GetWorld()->GetGameState();
 
@@ -30,7 +30,8 @@ void AMissionAir::StartUp(FVector pos)
 	if (gameState)
 	{
 		m_Target = gameState->GetTargetPool()->GetABaseTarget();
-	}
 
-	m_Target->Spawn(pos, GetActorRotation());
+		m_Target->GetTargetHandler().AddDynamic(this, &AMissionAir::FOnTargetDeactivationHandler);
+		m_Target->Spawn(GetActorLocation(), GetActorRotation());
+	}
 }

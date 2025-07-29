@@ -3,6 +3,7 @@
 #include "TargetObjectPoolComponent.h"
 #include "WorldActors/Interactable/Targets/BaseTarget.h"
 #include "WorldActors/Interactable/Targets/SplineTarget.h"
+#include "WorldActors/Interactable/Targets/SideToSideTarget.h"
 
 // Sets default values for this component's properties
 UTargetObjectPoolComponent::UTargetObjectPoolComponent()
@@ -86,6 +87,35 @@ ASplineTarget* UTargetObjectPoolComponent::GetASplineTarget()
 
 			newTarget = GetWorld()->SpawnActor<ASplineTarget>(BP_SplineTarget, SpawnLocation, SpawnRot, SpawnParams);
 			m_SplineTargetPool.Add(newTarget);
+		}
+	}
+
+	return newTarget;
+}
+
+ASideToSideTarget* UTargetObjectPoolComponent::GetASideToSideTarget()
+{
+	ASideToSideTarget* newTarget = nullptr;
+
+	for (ASideToSideTarget* target : m_SideToSideTargetPool)
+	{
+		if (!target->GetIsActive())
+		{
+			newTarget = target;
+			break;
+		}
+	}
+
+	if (newTarget == nullptr)
+	{
+		if (BP_SplineTarget != nullptr)
+		{
+			FVector SpawnLocation = FVector(0, 0, 0);
+			FRotator SpawnRot = FRotator(0, 0, 0);
+			FActorSpawnParameters SpawnParams;
+
+			newTarget = GetWorld()->SpawnActor<ASideToSideTarget>(BP_SideToSideTarget, SpawnLocation, SpawnRot, SpawnParams);
+			m_SideToSideTargetPool.Add(newTarget);
 		}
 	}
 

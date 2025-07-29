@@ -21,6 +21,8 @@ ASplineTarget::ASplineTarget()
 void ASplineTarget::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GetWorldTimerManager().SetTimer(Destroy_TimerHandle, this, &ASplineTarget::Deactivate, LifeSpan, false);
 }
 
 void ASplineTarget::Tick(float DeltaTime)
@@ -54,6 +56,8 @@ void ASplineTarget::Spawn(FVector loc, FRotator rot)
 
 	SetActorLocation(loc);
 	StaticMeshComponent->SetRelativeRotation(rot);
+
+	GetWorldTimerManager().SetTimer(Destroy_TimerHandle, this, &ASplineTarget::Deactivate, LifeSpan, false);
 }
 
 void ASplineTarget::Reset()
@@ -72,7 +76,7 @@ void ASplineTarget::Reset()
 
 void ASplineTarget::Deactivate()
 {
-	IsActive = true;
+	IsActive = false;
 
 	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
@@ -83,6 +87,11 @@ void ASplineTarget::Deactivate()
 	StaticMeshComponent->SetCastShadow(false);
 	StaticMeshComponent->bCastDynamicShadow = false;
 	StaticMeshComponent->bCastStaticShadow = false;
+
+	GetWorld()->GetTimerManager().ClearTimer(Destroy_TimerHandle);
+
+	OnTargetDeactivation.Broadcast();
+	OnTargetDeactivation.Clear();
 }
 
 void ASplineTarget::SetUpSpline(TArray<FVector> Points)

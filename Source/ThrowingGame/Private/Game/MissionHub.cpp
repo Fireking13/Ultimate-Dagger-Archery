@@ -22,6 +22,11 @@ void AMissionHub::BeginPlay()
 	
 }
 
+void AMissionHub::FOnMissionPointCompleteHandler()
+{
+	ReactivatePoint();
+}
+
 // Called every frame
 void AMissionHub::Tick(float DeltaTime)
 {

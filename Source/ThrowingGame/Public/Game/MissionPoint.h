@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "MissionPoint.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMissionPointComplete);
+
 UENUM(BlueprintType)
 enum class EMissionTypes : uint8
 {
@@ -37,16 +39,25 @@ protected:
 	EMissionTypes m_MissionType;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
-	TSubclassOf<class AMissionGround> GroundMission;
+	TSubclassOf<class AMissionGround> BP_GroundMission;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
-	TSubclassOf<class AMissionAir> AirMission;
+	TSubclassOf<class AMissionAir> BP_AirMission;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
-	TSubclassOf<class AMissionSpline> MovingSplineMission;
+	TSubclassOf<class AMissionSpline> BP_SplineMission;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
-	TSubclassOf<class AMissionSideToSide> MovingSideToSideMission;
+	TSubclassOf<class AMissionSideToSide> BP_SideToSideMission;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
+	TArray<FVector> Points;
+
+	UFUNCTION()
+	void FOnMissionCompleteHandler();
+
+	UPROPERTY(BlueprintAssignable, Category = "Mission Properties");
+	FOnMissionPointComplete OnMissionPointComplete;
 
 public:	
 	// Called every frame
@@ -55,4 +66,6 @@ public:
 	void StartUp();
 
 	bool GetIsActive();
+
+	FOnMissionPointComplete& GetMissionHandler() { return OnMissionPointComplete; };
 };
