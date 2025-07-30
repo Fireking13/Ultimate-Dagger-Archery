@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "MissionPoint.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMissionPointComplete);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMissionPointComplete, AMissionPoint*, Point);
 
 UENUM(BlueprintType)
 enum class EMissionTypes : uint8

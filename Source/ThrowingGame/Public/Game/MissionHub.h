@@ -39,7 +39,7 @@ protected:
 	TArray<int32> AvailablePoints;
 
 	UFUNCTION()
-	void FOnMissionPointCompleteHandler();
+	void FOnMissionPointCompleteHandler(AMissionPoint* point);
 
 public:	
 	// Called every frame
@@ -51,5 +51,5 @@ public:
 
 	//void PointDone();
 
-	void ReactivatePoint();
+	void ReactivatePoint(int32 index);
 };

@@ -28,7 +28,7 @@ void AMissionPoint::FOnMissionCompleteHandler()
 {
 	IsActive = false;
 
-	OnMissionPointComplete.Broadcast();
+	OnMissionPointComplete.Broadcast(this);
 }
 
 // Called every frame
