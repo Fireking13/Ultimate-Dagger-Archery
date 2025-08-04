@@ -31,6 +31,7 @@ void AMissionAir::StartUp(TArray<FVector> points)
 	{
 		m_Target = gameState->GetTargetPool()->GetABaseTarget();
 
+		m_Target->GetTargetHandler().Clear();//.RemoveDynamic(this, &AMissionAir::FOnTargetDeactivationHandler);
 		m_Target->GetTargetHandler().AddDynamic(this, &AMissionAir::FOnTargetDeactivationHandler);
 		m_Target->Spawn(GetActorLocation(), GetActorRotation());
 	}

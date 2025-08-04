@@ -91,7 +91,7 @@ void ASplineTarget::Deactivate()
 	GetWorld()->GetTimerManager().ClearTimer(Destroy_TimerHandle);
 
 	OnTargetDeactivation.Broadcast();
-	OnTargetDeactivation.Clear();
+	//OnTargetDeactivation.Clear();
 }
 
 void ASplineTarget::SetUpSpline(TArray<FVector> Points)

@@ -23,7 +23,10 @@ void AMissionBase::FOnTargetDeactivationHandler()
 {
 	isNotDone = true;
 
+	m_Target = nullptr;
+
 	OnMissionComplete.Broadcast();
+	//OnMissionComplete.Clear();
 }
 
 // Called every frame

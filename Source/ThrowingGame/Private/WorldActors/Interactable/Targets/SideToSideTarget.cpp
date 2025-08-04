@@ -78,7 +78,7 @@ void ASideToSideTarget::Deactivate()
 	GetWorld()->GetTimerManager().ClearTimer(Destroy_TimerHandle);
 
 	OnTargetDeactivation.Broadcast();
-	OnTargetDeactivation.Clear();
+	//OnTargetDeactivation.Clear();
 }
 
 void ASideToSideTarget::SetUpPoints(TArray<FVector> points)

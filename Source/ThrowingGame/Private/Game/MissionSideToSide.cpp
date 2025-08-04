@@ -34,6 +34,8 @@ void AMissionSideToSide::StartUp(TArray<FVector> points)
 		ASideToSideTarget* target = gameState->GetTargetPool()->GetASideToSideTarget();
 
 		target->SetUpPoints(Points);
+
+		target->GetTargetHandler().Clear(); //.RemoveDynamic(this, &AMissionSideToSide::FOnTargetDeactivationHandler);
 		target->GetTargetHandler().AddDynamic(this, &AMissionSideToSide::FOnTargetDeactivationHandler);
 		target->Spawn(GetActorLocation(), GetActorRotation());
 

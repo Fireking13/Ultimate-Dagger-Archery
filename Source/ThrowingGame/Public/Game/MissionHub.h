@@ -41,6 +41,8 @@ protected:
 	UFUNCTION()
 	void FOnMissionPointCompleteHandler(AMissionPoint* point);
 
+	void CheckAvailablePoints();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

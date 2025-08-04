@@ -61,6 +61,7 @@ void AMissionGround::StartUp(TArray<FVector> points)
 		newPos = end;
 	}
 
+	m_Target->GetTargetHandler().Clear();//.RemoveDynamic(this, &AMissionGround::FOnTargetDeactivationHandler);
 	m_Target->GetTargetHandler().AddDynamic(this, &AMissionGround::FOnTargetDeactivationHandler);
 	m_Target->Spawn(newPos, GetActorRotation());
 }

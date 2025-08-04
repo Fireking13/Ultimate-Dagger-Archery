@@ -36,7 +36,7 @@ ABaseTarget::ABaseTarget()
 	RingSpace = 18.f; 
 	MaxPoints = 100.f; 
 	RingNum = 5;
-	Health = 3;
+	Health = MaxHealth;
 
 	Tags.Add(TEXT("Target"));
 
@@ -69,8 +69,9 @@ void ABaseTarget::Spawn(FVector loc, FRotator rot)
 {
 	Reset();
 
-	SetActorLocation(loc);
-	StaticMeshComponent->SetRelativeRotation(rot);
+	//SetActorLocation(loc);
+	SetActorLocationAndRotation(loc, rot);
+	//StaticMeshComponent->SetRelativeRotation(rot);
 
 	GetWorldTimerManager().SetTimer(Destroy_TimerHandle, this, &ABaseTarget::Deactivate, LifeSpan, false);
 }
@@ -87,10 +88,20 @@ void ABaseTarget::Reset()
 	StaticMeshComponent->SetCastShadow(true);
 	StaticMeshComponent->bCastDynamicShadow = true;
 	StaticMeshComponent->bCastStaticShadow = true;
+
+	Health = MaxHealth;
 }
 
 void ABaseTarget::Deactivate()
 {
+	TArray<AActor*> actors;
+	GetAttachedActors(actors);
+
+	for (AActor* attached : actors)
+	{
+		attached->Destroy();
+	}
+
 	IsActive = false;
 
 	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -106,7 +117,7 @@ void ABaseTarget::Deactivate()
 	GetWorld()->GetTimerManager().ClearTimer(Destroy_TimerHandle);
 
 	OnTargetDeactivation.Broadcast();
-	OnTargetDeactivation.Clear();
+	//OnTargetDeactivation.Clear();
 }
 
 void ABaseTarget::HitCheck(AActor* dagger, FVector HitPoint)

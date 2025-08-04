@@ -34,6 +34,8 @@ void AMissionSpline::StartUp(TArray<FVector> points)
 		ASplineTarget* target = gameState->GetTargetPool()->GetASplineTarget();
 		
 		target->SetUpSpline(Points);
+
+		target->GetTargetHandler().Clear();//.RemoveDynamic(this, &AMissionSpline::FOnTargetDeactivationHandler);
 		target->GetTargetHandler().AddDynamic(this, &AMissionSpline::FOnTargetDeactivationHandler);
 		target->Spawn(GetActorLocation(), GetActorRotation());
 

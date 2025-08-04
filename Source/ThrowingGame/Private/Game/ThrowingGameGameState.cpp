@@ -2,15 +2,34 @@
 
 #include "Game/ThrowingGameGameState.h"
 #include "Game/MissionHub.h"
+#include "Kismet/GameplayStatics.h"
+#include "TargetObjectPoolComponent.h"
 
 AThrowingGameGameState::AThrowingGameGameState()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	m_TargetPool = CreateDefaultSubobject<UTargetObjectPoolComponent>(TEXT("TargetObjectPoolComponent"));
 }
 
 void AThrowingGameGameState::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (m_MissionHub == nullptr)
+	{
+		TArray<AActor*> FoundMissionHubs;
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMissionHub::StaticClass(), FoundMissionHubs);
+
+		if (FoundMissionHubs.Num() > 0)
+		{
+			m_MissionHub = Cast<AMissionHub>(FoundMissionHubs[0]);
+		}
+		else
+		{
+			//error
+		}
+	}
 
 	StartLevel(); //debug TODO: remove
 }

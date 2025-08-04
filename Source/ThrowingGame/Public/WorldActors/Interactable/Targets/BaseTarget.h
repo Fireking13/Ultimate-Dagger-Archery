@@ -31,6 +31,9 @@ protected:
 	bool IsActive;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
+	int32 MaxHealth;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
 	int32 Health;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
@@ -63,16 +66,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	/*
-	UFUNCTION()
-	virtual void OnOverlapBegin(
-		UPrimitiveComponent* OverlappedComp,
-		AActor* OtherActor,
-		UPrimitiveComponent* OtherComp,
-		int32 OtherBodyIndex,
-		bool bFromSweep,
-		const FHitResult& SweepResult);*/
-
 	virtual void Spawn(FVector loc, FRotator rot);
 
 	virtual void Reset();
@@ -88,6 +81,8 @@ public:
 	bool GetIsActive();
 
 	FOnTargetDeactivation& GetTargetHandler() { return OnTargetDeactivation; };
+
+
 
 protected:
 	void LifeSpanCheck(float deltaTime);

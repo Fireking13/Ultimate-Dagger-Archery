@@ -54,6 +54,7 @@ ABaseTarget* UTargetObjectPoolComponent::GetABaseTarget()
 			FVector SpawnLocation = FVector(0, 0, 0);
 			FRotator SpawnRot = FRotator(0, 0, 0);
 			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 			newTarget = GetWorld()->SpawnActor<ABaseTarget>(BP_BaseTarget, SpawnLocation, SpawnRot, SpawnParams);
 			m_BaseTargetPool.Add(newTarget);
@@ -84,6 +85,7 @@ ASplineTarget* UTargetObjectPoolComponent::GetASplineTarget()
 			FVector SpawnLocation = FVector(0, 0, 0);
 			FRotator SpawnRot = FRotator(0, 0, 0);
 			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 			newTarget = GetWorld()->SpawnActor<ASplineTarget>(BP_SplineTarget, SpawnLocation, SpawnRot, SpawnParams);
 			m_SplineTargetPool.Add(newTarget);
@@ -113,6 +115,7 @@ ASideToSideTarget* UTargetObjectPoolComponent::GetASideToSideTarget()
 			FVector SpawnLocation = FVector(0, 0, 0);
 			FRotator SpawnRot = FRotator(0, 0, 0);
 			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 			newTarget = GetWorld()->SpawnActor<ASideToSideTarget>(BP_SideToSideTarget, SpawnLocation, SpawnRot, SpawnParams);
 			m_SideToSideTargetPool.Add(newTarget);

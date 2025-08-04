@@ -26,59 +26,45 @@ void AMissionHub::FOnMissionPointCompleteHandler(AMissionPoint* point)
 {
 	if (IsActive)
 	{
+		int32 i = m_Missions.Find(point);
 
-		//m_MissionsActive.RemoveAt(i);
+		if (i != INDEX_NONE)
+		{
+			m_MissionsActive.RemoveSingle(point);
 
-		ReactivatePoint(-1); //think more when not tired lol TODO:
+			ReactivatePoint(i);
 
-		//AvailablePoints.Add(i);
-
+			AvailablePoints.Add(i);
+		}
+		else
+		{
+			// Error: Point not found in active list
+		}
 	}
+}
+
+void AMissionHub::CheckAvailablePoints()
+{
 }
 
 // Called every frame
 void AMissionHub::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	/*
-	for (int32 i = 0; i < m_MissionsActive.Num() - 1; i++)
-	{
-		if (!m_MissionsActive[i]->GetIsActive())
-		{
-			ReactivatePoint();
-			AvailablePoints.Add(i);
-
-			m_MissionsActive.RemoveAt(i);
-		}
-	}*/
-
-	/*if (IsActive)
-	{
-		for (int32 i = m_MissionsActive.Num() - 1; i >= 0; i--)
-		{
-			if (!m_MissionsActive[i]->GetIsActive())
-			{
-				m_MissionsActive.RemoveAt(i);
-				ReactivatePoint();
-				AvailablePoints.Add(i);
-			}
-		}
-	}*/
 }
 
 void AMissionHub::StartUp()
 {
-	for (int32 i = 0; i < MaxMissionInWorld; i++)
+	for (int32 i = 0; i < m_Missions.Num(); i++)
 	{
 		AvailablePoints.Add(i);
 	}
 
-	for (int32 i = AvailablePoints.Num() - 1; i > 0; i--)
+	/*for (int32 i = AvailablePoints.Num() - 1; i > 0; i--)
 	{
 		int32 j = FMath::RandRange(0, i);
 		AvailablePoints.Swap(i, j);
-	}
+	}*/
 
 	for (int32 i = 0; i < MaxMissionInWorld; i++)
 	{
@@ -98,8 +84,11 @@ void AMissionHub::ReactivatePoint(int32 index)
 	int randomUnusedNum = FMath::RandRange(0, AvailablePoints.Num() - 1);
 	int PointIndex = AvailablePoints[randomUnusedNum];
 
+	m_Missions[PointIndex]->GetMissionHandler().Clear();//.RemoveDynamic(this, &AMissionHub::FOnMissionPointCompleteHandler);
 	m_Missions[PointIndex]->GetMissionHandler().AddDynamic(this, &AMissionHub::FOnMissionPointCompleteHandler);
 	m_Missions[PointIndex]->StartUp();
+
 	m_MissionsActive.Add(m_Missions[PointIndex]);
+
 	AvailablePoints.RemoveAt(randomUnusedNum);
 }
