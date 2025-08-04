@@ -50,14 +50,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
 	TSubclassOf<class AMissionSideToSide> BP_SideToSideMission;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Mission Properties")
-	TArray<FVector> Points;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
+	TArray<AActor*> Points;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "EditorOnly")
+	class UArrowComponent* ArrowComponent;
 
 	UFUNCTION()
 	void FOnMissionCompleteHandler();
 
 	UPROPERTY(BlueprintAssignable, Category = "Mission Properties");
 	FOnMissionPointComplete OnMissionPointComplete;
+
+	TArray<FVector> PointLocs;
 
 public:	
 	// Called every frame

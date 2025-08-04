@@ -82,7 +82,7 @@ public:
 
 	FOnTargetDeactivation& GetTargetHandler() { return OnTargetDeactivation; };
 
-
+	void RemoveDaggers();
 
 protected:
 	void LifeSpanCheck(float deltaTime);

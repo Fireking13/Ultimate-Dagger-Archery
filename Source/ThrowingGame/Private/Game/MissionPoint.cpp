@@ -5,12 +5,17 @@
 #include "Game/MissionGround.h"
 #include "Game/MissionSpline.h"
 #include "Game/MissionSideToSide.h"
+#include "Components/ArrowComponent.h" 
 
 // Sets default values
 AMissionPoint::AMissionPoint()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	ArrowComponent = CreateDefaultSubobject<UArrowComponent>(TEXT("ArrowComponent"));
+	ArrowComponent->SetupAttachment(RootComponent);
+
+	ArrowComponent->SetHiddenInGame(true);
 
 	m_Mission = nullptr;
 
@@ -22,6 +27,16 @@ void AMissionPoint::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (Points.Num())
+	{
+		for (int32 i = 0; i < Points.Num(); i++)
+		{
+			if (Points[i])
+			{
+				PointLocs.Add(Points[i]->GetActorLocation());
+			}
+		}
+	}
 }
 
 void AMissionPoint::FOnMissionCompleteHandler()
@@ -72,7 +87,7 @@ void AMissionPoint::StartUp()
 	{
 		m_Mission->GetMissionHandler().Clear();//RemoveDynamic(this, &AMissionPoint::FOnMissionCompleteHandler);
 		m_Mission->GetMissionHandler().AddDynamic(this, &AMissionPoint::FOnMissionCompleteHandler);
-		m_Mission->StartUp(Points);
+		m_Mission->StartUp(PointLocs);
 	}
 	else
 	{

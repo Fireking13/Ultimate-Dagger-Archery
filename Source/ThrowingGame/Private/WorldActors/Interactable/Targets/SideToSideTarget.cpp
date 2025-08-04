@@ -39,8 +39,7 @@ void ASideToSideTarget::Spawn(FVector loc, FRotator rot)
 {
 	Reset();
 
-	SetActorLocation(loc);
-	StaticMeshComponent->SetRelativeRotation(rot);
+	SetActorLocationAndRotation(loc, rot);
 
 	GetWorldTimerManager().SetTimer(Destroy_TimerHandle, this, &ASideToSideTarget::Deactivate, LifeSpan, false);
 }
@@ -59,10 +58,14 @@ void ASideToSideTarget::Reset()
 	StaticMeshComponent->bCastStaticShadow = true;
 
 	Index = 0;
+
+	Health = MaxHealth;
 }
 
 void ASideToSideTarget::Deactivate()
 {
+	RemoveDaggers();
+
 	IsActive = false;
 
 	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);

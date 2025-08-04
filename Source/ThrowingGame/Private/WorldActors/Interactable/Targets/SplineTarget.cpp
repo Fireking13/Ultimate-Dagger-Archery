@@ -54,8 +54,7 @@ void ASplineTarget::Spawn(FVector loc, FRotator rot)
 {
 	Reset();
 
-	SetActorLocation(loc);
-	StaticMeshComponent->SetRelativeRotation(rot);
+	SetActorLocationAndRotation(loc, rot);
 
 	GetWorldTimerManager().SetTimer(Destroy_TimerHandle, this, &ASplineTarget::Deactivate, LifeSpan, false);
 }
@@ -72,10 +71,14 @@ void ASplineTarget::Reset()
 	StaticMeshComponent->SetCastShadow(true);
 	StaticMeshComponent->bCastDynamicShadow = true;
 	StaticMeshComponent->bCastStaticShadow = true;
+
+	Health = MaxHealth;
 }
 
 void ASplineTarget::Deactivate()
 {
+	RemoveDaggers();
+
 	IsActive = false;
 
 	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);

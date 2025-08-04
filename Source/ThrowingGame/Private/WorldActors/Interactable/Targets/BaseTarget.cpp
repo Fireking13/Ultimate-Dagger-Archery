@@ -94,13 +94,7 @@ void ABaseTarget::Reset()
 
 void ABaseTarget::Deactivate()
 {
-	TArray<AActor*> actors;
-	GetAttachedActors(actors);
-
-	for (AActor* attached : actors)
-	{
-		attached->Destroy();
-	}
+	RemoveDaggers();
 
 	IsActive = false;
 
@@ -176,6 +170,17 @@ void ABaseTarget::SendPoints(float num)
 bool ABaseTarget::GetIsActive()
 {
 	return IsActive;
+}
+
+void ABaseTarget::RemoveDaggers()
+{
+	TArray<AActor*> actors;
+	GetAttachedActors(actors);
+
+	for (AActor* attached : actors)
+	{
+		attached->Destroy();
+	}
 }
 
 void ABaseTarget::LifeSpanCheck(float deltaTime)
