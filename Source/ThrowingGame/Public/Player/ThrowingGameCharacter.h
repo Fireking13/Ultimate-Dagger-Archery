@@ -102,6 +102,8 @@ protected:
 	//virtual void Jump() override;
 	//virtual void StopJumping() override;
 
+	void AirStyleCheck(float deltaTime);
+
 protected:
 	FVector SideDir;
 
@@ -147,6 +149,13 @@ protected:
 	float AdjustTimer;
 	float AdjustTimerMax;
 
+	float AirTimeStyle;
+	float AirTimeStyleMax;
+	float AirTimeStyleIncrement;
+	float AirTimeStyleIncrementInterval;
+	float AirTimeStyleTimer;
+	float AirTimeStyleDef;
+
 protected:
 	// APawn interface
 	virtual void NotifyControllerChanged() override;
@@ -159,6 +168,12 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
+	float GetAirTimeStyle() { return AirTimeStyle; }
 
+	float GetOGSpeed() { return OG_Speed; }
+
+	float GetOGSpeed() { return OG_Speed; }
+
+	float GetTopSpeed();
 };
 

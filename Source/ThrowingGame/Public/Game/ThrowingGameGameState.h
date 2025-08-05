@@ -41,4 +41,7 @@ public:
 	AMissionHub* GetMissionHub();
 
 	UTargetObjectPoolComponent* GetTargetPool();
+
+	UFUNCTION()
+	void FReceivePointsHandler(int32 points);
 };

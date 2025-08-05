@@ -8,6 +8,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTargetDeactivation);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FReceivePointsHandler, int32, points);
+
 UCLASS()
 class THROWINGGAME_API ABaseTarget : public AActor
 {
@@ -54,6 +56,14 @@ protected:
 	UPROPERTY(BlueprintAssignable, Category = "Target Properties")
 	FOnTargetDeactivation OnTargetDeactivation;
 
+	UPROPERTY(BlueprintAssignable, Category = "Target Properties")
+	FReceivePointsHandler ReceivePoints;
+
+	float DistanceIntervalVal;
+	float DistanceIntervalDis;
+	float DistanceMin;
+	float DistanceValMax;
+
 protected:
 
 	UPROPERTY(EditAnywhere)
@@ -81,6 +91,8 @@ public:
 	bool GetIsActive();
 
 	FOnTargetDeactivation& GetTargetHandler() { return OnTargetDeactivation; };
+
+	FReceivePointsHandler& GetReceivePointsHandler() { return ReceivePoints; };
 
 	void RemoveDaggers();
 

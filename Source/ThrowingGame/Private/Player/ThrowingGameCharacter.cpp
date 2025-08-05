@@ -56,6 +56,13 @@ AThrowingGameCharacter::AThrowingGameCharacter()
 	AdjustTimer = 0.0f;
 	AdjustTimerMax = 1.0f;
 
+	AirTimeStyleDef = 1.0f;
+	AirTimeStyle = AirTimeStyleDef;
+	AirTimeStyleMax = 2.0f;
+	AirTimeStyleIncrement = 0.1f;
+	AirTimeStyleIncrementInterval = 1.0f;
+	AirTimeStyleTimer = 0.0f;
+
 	for (bool daggerSpot : DaggerSpots)
 	{
 		daggerSpot = false;
@@ -81,6 +88,15 @@ void AThrowingGameCharacter::Tick(float DeltaTime)
 		{
 			dagger->Adjust(TargetPoint);
 		}
+	}
+
+	if (GetCharacterMovement()->IsFalling())
+	{
+		AirStyleCheck(DeltaTime);
+	}
+	else
+	{
+		AirTimeStyle = AirTimeStyleDef;
 	}
 }
 
@@ -324,6 +340,13 @@ void AThrowingGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	}
 }
 
+float AThrowingGameCharacter::GetTopSpeed()
+{
+	float topSpeed = FMath::Max3(SlideSpeed, DashStrength, OG_Speed);
+
+	return topSpeed;
+}
+
 
 void AThrowingGameCharacter::Move(const FInputActionValue& Value)
 {
@@ -446,5 +469,18 @@ void AThrowingGameCharacter::SlideJumpCheck()
 	}
 
 	Jump();
+}
+
+void AThrowingGameCharacter::AirStyleCheck(float deltaTime)
+{
+	AirTimeStyleTimer += deltaTime;
+
+	if (AirTimeStyleTimer >= AirTimeStyleIncrementInterval)
+	{
+		AirTimeStyleTimer = 0.0f;
+
+		AirTimeStyle += AirTimeStyleIncrement;
+		AirTimeStyle = FMath::Min(AirTimeStyle, AirTimeStyleMax);
+	}
 }
 

@@ -4,6 +4,7 @@
 #include "Projectile/Dagger.h"
 #include "Components/SphereComponent.h"
 #include "Math/UnrealMathUtility.h"
+#include "Player/ThrowingGameCharacter.h"
 
 // Sets default values
 ABaseTarget::ABaseTarget()
@@ -38,6 +39,11 @@ ABaseTarget::ABaseTarget()
 	RingNum = 5;
 	Health = MaxHealth;
 
+	DistanceIntervalVal = 10.0f;
+	DistanceIntervalDis = 200.0f;
+	DistanceMin = 750.0f;
+	DistanceValMax = 100.0f;
+
 	Tags.Add(TEXT("Target"));
 
 }
@@ -69,9 +75,7 @@ void ABaseTarget::Spawn(FVector loc, FRotator rot)
 {
 	Reset();
 
-	//SetActorLocation(loc);
-	SetActorLocationAndRotation(loc, rot);
-	//StaticMeshComponent->SetRelativeRotation(rot);
+	SetActorLocationAndRotation(loc, rot);;
 
 	GetWorldTimerManager().SetTimer(Destroy_TimerHandle, this, &ABaseTarget::Deactivate, LifeSpan, false);
 }
@@ -159,7 +163,39 @@ void ABaseTarget::CalculatePoints(float dis)
 		points = FMath::Clamp(points, MaxPoints / 10, MaxPoints);
 	}
 
-	SendPoints(points);
+	AThrowingGameCharacter* Player = Cast<AThrowingGameCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+
+	if (Player)
+	{
+		float distance = FVector::Dist(Player->GetActorLocation(), GetActorLocation());
+
+		float newDistance = distance - DistanceMin;
+		int intervals = 0;
+
+		if (newDistance > 0)
+		{
+			intervals = newDistance / DistanceIntervalDis;
+		}
+
+		float distanceVal = DistanceIntervalVal * intervals;
+
+		distanceVal = FMath::Clamp(distanceVal, 0.f, DistanceValMax);
+
+		points += distanceVal;
+
+		points *= Player->GetAirTimeStyle();
+
+		float Speed = Player->GetVelocity().Size();
+		float ogSpeed = Player->GetOGSpeed();
+		float topSpeed = Player->GetTopSpeed();
+
+		float speedVal;
+	}
+
+	int32 pointsInt = int32(points);
+
+	ReceivePoints.Broadcast(pointsInt);
+	SendPoints(points); //todo remove
 }
 
 void ABaseTarget::SendPoints(float num)

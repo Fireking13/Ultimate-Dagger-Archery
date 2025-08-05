@@ -4,6 +4,7 @@
 #include "WorldActors/Interactable/Targets/BaseTarget.h"
 #include "WorldActors/Interactable/Targets/SplineTarget.h"
 #include "WorldActors/Interactable/Targets/SideToSideTarget.h"
+#include "Game/ThrowingGameGameState.h"
 
 // Sets default values for this component's properties
 UTargetObjectPoolComponent::UTargetObjectPoolComponent()
@@ -57,6 +58,17 @@ ABaseTarget* UTargetObjectPoolComponent::GetABaseTarget()
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 			newTarget = GetWorld()->SpawnActor<ABaseTarget>(BP_BaseTarget, SpawnLocation, SpawnRot, SpawnParams);
+
+			AThrowingGameGameState* GameState = Cast<AThrowingGameGameState>(GetWorld()->GetGameState());
+			if (GameState)
+			{
+				newTarget->GetReceivePointsHandler().AddDynamic(GameState, &AThrowingGameGameState::FReceivePointsHandler);
+			}
+			else
+			{
+				//error
+			}
+
 			m_BaseTargetPool.Add(newTarget);
 		}
 	}

@@ -34,6 +34,11 @@ void AThrowingGameGameState::BeginPlay()
 	StartLevel(); //debug TODO: remove
 }
 
+void AThrowingGameGameState::FReceivePointsHandler(int32 points)
+{
+	m_Score += points;
+}
+
 void AThrowingGameGameState::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
