@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "PlacedDagger.generated.h"
+#include "KillBox.generated.h"
 
 UCLASS()
-class THROWINGGAME_API APlacedDagger : public AActor
+class THROWINGGAME_API AKillBox : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	APlacedDagger();
+	AKillBox();
 
 protected:
 	// Called when the game starts or when spawned
@@ -21,20 +21,20 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* BoxComponent;
-
-	UPROPERTY(EditAnywhere)
-	class USphereComponent* SphereComponent;
-
-	UPROPERTY(EditAnywhere)
-	class UStaticMeshComponent* StaticMeshComponent;
-
-	bool HitWall;
-
-	float HightAdjNum;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "KillBox Properties")
+	AActor* TeleportPoint;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void AdjustHitBox(FRotator meshRot, bool hitWall);
+	UFUNCTION()
+	void OnOverlapBegin(
+		UPrimitiveComponent* OverlappedComp,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult);
 };

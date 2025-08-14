@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "Player/ThrowingGameCharacter.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APlacedDagger::APlacedDagger()
@@ -30,7 +31,7 @@ APlacedDagger::APlacedDagger()
 	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 	StaticMeshComponent->SetupAttachment(SphereComponent);
 	
-	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
+	/*BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	BoxComponent->SetNotifyRigidBodyCollision(true);
 	BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	BoxComponent->SetCollisionResponseToAllChannels(ECR_Block);
@@ -39,9 +40,23 @@ APlacedDagger::APlacedDagger()
 	BoxComponent->SetEnableGravity(false);
 	BoxComponent->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Default, 1.f));
 	BoxComponent->CanCharacterStepUpOn = ECB_Yes;
+	BoxComponent->SetupAttachment(SphereComponent); */
+
+	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	BoxComponent->SetCollisionObjectType(ECC_WorldStatic);
+
+	BoxComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	BoxComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); 
+
+	BoxComponent->SetGenerateOverlapEvents(true);
+	BoxComponent->CanCharacterStepUpOn = ECB_Yes;
 	BoxComponent->SetupAttachment(SphereComponent);
+
+	HightAdjNum = 75.f;
 	
 	Tags.Add(TEXT("Projectile Never Hit"));
+	Tags.Add(TEXT("Target Never Hit"));
 }
 
 // Called when the game starts or when spawned
@@ -56,9 +71,26 @@ void APlacedDagger::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (HitWall)
+	{
+		if (ACharacter* Player = Cast<ACharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+		{
+			FVector PlayerLocation = Player->GetActorLocation();
+			FVector PlatformLocation = BoxComponent->GetComponentLocation();
+
+			if (PlayerLocation.Z > PlatformLocation.Z + HightAdjNum)
+			{
+				BoxComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+			}
+			else
+			{
+				BoxComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+			}
+		}
+	}
 }
 
-void APlacedDagger::AdjustHitBox(FRotator MeshRot)
+void APlacedDagger::AdjustHitBox(FRotator meshRot, bool hitWall)
 {
 	FRotator currentRot = BoxComponent->GetRelativeRotation();
 
@@ -66,6 +98,8 @@ void APlacedDagger::AdjustHitBox(FRotator MeshRot)
 
 	BoxComponent->SetRelativeRotation(correctedRot);
 
-	StaticMeshComponent->SetWorldRotation(MeshRot);
+	StaticMeshComponent->SetWorldRotation(meshRot);
+
+	HitWall = hitWall;
 }
 

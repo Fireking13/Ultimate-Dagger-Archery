@@ -151,6 +151,9 @@ void ABaseTarget::CalculatePoints(float dis)
 {
 	float points = MaxPoints;
 
+	float distanceVal = 0;
+	float speedVal = 1.0f;
+
 	for (int32 i = 0; i < RingNum; i++)
 	{
 		if (dis < RingSpace + (RingSpace * i) + 1)
@@ -162,6 +165,8 @@ void ABaseTarget::CalculatePoints(float dis)
 
 		points = FMath::Clamp(points, MaxPoints / 10, MaxPoints);
 	}
+
+	int32 pointsOG = int32(points);
 
 	AThrowingGameCharacter* Player = Cast<AThrowingGameCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 
@@ -177,24 +182,29 @@ void ABaseTarget::CalculatePoints(float dis)
 			intervals = newDistance / DistanceIntervalDis;
 		}
 
-		float distanceVal = DistanceIntervalVal * intervals;
+		distanceVal = DistanceIntervalVal * intervals;
 
 		distanceVal = FMath::Clamp(distanceVal, 0.f, DistanceValMax);
 
-		points += distanceVal;
-
-		points *= Player->GetAirTimeStyle();
-
-		float Speed = Player->GetVelocity().Size();
+		float speed = Player->GetVelocity().Size();
 		float ogSpeed = Player->GetOGSpeed();
 		float topSpeed = Player->GetTopSpeed();
 
-		float speedVal;
+		float speedRatio = speed / topSpeed;
+
+		speedVal = 1.0f + speedRatio * (2.5f - 1.0f) * (ogSpeed / topSpeed);
+		speedVal = FMath::Clamp(speedVal, 1.0f, 2.5f);
+
+		//points += distanceVal;
+
+		//points *= Player->GetAirTimeStyle();
+
+		points = points + distanceVal + (points * Player->GetAirTimeStyle() - points) + (points * speedVal - points);
 	}
 
 	int32 pointsInt = int32(points);
 
-	ReceivePoints.Broadcast(pointsInt);
+	ReceivePoints.Broadcast(pointsInt, pointsOG, distanceVal, Player->GetAirTimeStyle(), speedVal);
 	SendPoints(points); //todo remove
 }
 

@@ -43,5 +43,5 @@ public:
 	UTargetObjectPoolComponent* GetTargetPool();
 
 	UFUNCTION()
-	void FReceivePointsHandler(int32 points);
+	void FReceivePointsHandler(int32 points, int32 pointsOG, float distanceVal, float airTimeStyle, float speedVal);
 };

@@ -34,7 +34,7 @@ void AThrowingGameGameState::BeginPlay()
 	StartLevel(); //debug TODO: remove
 }
 
-void AThrowingGameGameState::FReceivePointsHandler(int32 points)
+void AThrowingGameGameState::FReceivePointsHandler(int32 points, int32 pointsOG, float distanceVal, float airTimeStyle, float speedVal)
 {
 	m_Score += points;
 }

@@ -172,8 +172,6 @@ public:
 
 	float GetOGSpeed() { return OG_Speed; }
 
-	float GetOGSpeed() { return OG_Speed; }
-
 	float GetTopSpeed();
 };
 

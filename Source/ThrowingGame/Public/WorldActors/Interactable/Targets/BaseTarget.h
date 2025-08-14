@@ -8,7 +8,14 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnTargetDeactivation);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FReceivePointsHandler, int32, points);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_FiveParams(
+	FReceivePointsHandler,
+	int32, points,
+	int32, pointsOG,
+	float, distanceVal,
+	float, airTimeStyle,
+	float, speedVal
+);
 
 UCLASS()
 class THROWINGGAME_API ABaseTarget : public AActor

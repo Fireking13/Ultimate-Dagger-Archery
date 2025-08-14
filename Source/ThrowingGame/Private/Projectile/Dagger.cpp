@@ -154,6 +154,7 @@ void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 			bool bHit = GetWorld()->LineTraceMultiByObjectType(hitResults, start, end, ObjectQueryParams);
 			bool bValidHit = false;
 
+
 			for (FHitResult& hit : hitResults)
 			{
 				AActor* hitActor = hit.GetActor();
@@ -177,7 +178,7 @@ void ADagger::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 			FActorSpawnParameters spawnParams;
 
 			APlacedDagger* placedDagger = GetWorld()->SpawnActor<APlacedDagger>(BP_PlacedDagger, spawnLocation, spawnRot, spawnParams);
-			placedDagger->AdjustHitBox(StaticMeshComponent->GetComponentRotation());
+			placedDagger->AdjustHitBox(StaticMeshComponent->GetComponentRotation(), bool(OtherActor->ActorHasTag("Wall")));
 			placedDagger->AttachToComponent(OtherComp, FAttachmentTransformRules::KeepWorldTransform);
 		}
 
@@ -293,19 +294,72 @@ void ADagger::ResetSpawnLocations()
 {
 	if (PlayerCharacter != nullptr)
 	{
-		FVector pos = PlayerCharacter->GetFirstPersonCameraComponent()->GetComponentLocation();
-		FVector forwardVec = PlayerCharacter->GetFirstPersonCameraComponent()->GetForwardVector();
-		FVector rightVec = PlayerCharacter->GetFirstPersonCameraComponent()->GetRightVector();
-		FVector upVec = PlayerCharacter->GetFirstPersonCameraComponent()->GetUpVector();
+		UCameraComponent* cam = PlayerCharacter->GetFirstPersonCameraComponent();
+
+		FVector pos = cam->GetComponentLocation();
+		FVector forwardVec = cam->GetForwardVector();
+		FVector rightVec = cam->GetRightVector();
+		FVector upVec = cam->GetUpVector();
+
+		APlayerController* playerController = Cast<APlayerController>(PlayerCharacter->GetController());
+		if (!playerController)
+		{
+			return; //error
+		}
+
+		int32 viewportX, viewportY;
+		playerController->GetViewportSize(viewportX, viewportY);
+
+		float aspectRatio = ((float)viewportX) / ((float)viewportY);
+		float verticalFOVRadians = FMath::DegreesToRadians(cam->FieldOfView);
+		float distance = 50.f; 
+
+		float halfHeight = distance * FMath::Tan(verticalFOVRadians / 2.f);
+		float halfWidth = halfHeight * aspectRatio;
+
+		float sideDiSDif = 3.15f;	//1.75f;
+		float bottomDiSDif = 3.15f;	//1.75f;
+
+		float tolerance = 0.01f;
+		if (FMath::Abs(aspectRatio - (4.f / 3.f)) < tolerance)
+		{
+			sideDiSDif = 1.05f;
+			bottomDiSDif = 0.78f;
+		}
+		else if(FMath::Abs(aspectRatio - (21.f / 9.f)) < tolerance)
+		{
+			bottomDiSDif = 4.08f;
+		}
+
+		float sideHight;
+		float bottomWidth;
+
+
+
+
+
+		FVector center = pos + forwardVec * distance;
+
+		float pushBack = 15.f;
 
 		SpawnLocations.Empty();
 
+		SpawnLocations.Add((center - rightVec * halfWidth + upVec * halfHeight) - forwardVec * pushBack);
+		SpawnLocations.Add((center + rightVec * halfWidth + upVec * halfHeight) - forwardVec * pushBack);
+		SpawnLocations.Add((center - rightVec * halfWidth - upVec * halfHeight) - forwardVec * pushBack);
+		SpawnLocations.Add((center + rightVec * halfWidth - upVec * halfHeight) - forwardVec * pushBack);
+
+		SpawnLocations.Add(FVector::ZeroVector);
+
+
+		//TODO make a settings and more for most math
+
+		/*
 		SpawnLocations.Add(pos + upVec * -20 + (-rightVec) * 100.0f + forwardVec * 35);
 		SpawnLocations.Add(pos + upVec * (59.04f - 20) + (-rightVec) * 64.0f + forwardVec * 35);
 		SpawnLocations.Add(pos + upVec * (100.0f - 20) + forwardVec * 35);
 		SpawnLocations.Add(pos + upVec * (59.04f - 20) + rightVec * 64.0f + forwardVec * 35);
 		SpawnLocations.Add(pos + upVec * -20 + rightVec * 100.0f + forwardVec * 35);
-
-		//TODO: fix this you dumb dumb
+		*/
 	}
 }
