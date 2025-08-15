@@ -317,6 +317,9 @@ void ADagger::ResetSpawnLocations()
 		float halfHeight = distance * FMath::Tan(verticalFOVRadians / 2.f);
 		float halfWidth = halfHeight * aspectRatio;
 
+		//todo get ratio
+		FVector2D screanRatio(16.f, 9.f);
+
 		float sideDiSDif = 3.15f;	//1.75f;
 		float bottomDiSDif = 3.15f;	//1.75f;
 
@@ -330,13 +333,15 @@ void ADagger::ResetSpawnLocations()
 		{
 			bottomDiSDif = 4.08f;
 		}
+		/*
+		int32 gcd = FMath::GreatestCommonDivisor(viewportX, viewportY);
+		FVector2D aspectVec(
+			static_cast<float>(viewportX / gcd),
+			static_cast<float>(viewportY / gcd)
+		);*/
 
-		float sideHight;
-		float bottomWidth;
-
-
-
-
+		float sideHight = (halfHeight * 2) * (sideDiSDif / screanRatio.Y);
+		float bottomWidth = (halfWidth * 2) * (bottomDiSDif / screanRatio.X);
 
 		FVector center = pos + forwardVec * distance;
 
@@ -344,10 +349,11 @@ void ADagger::ResetSpawnLocations()
 
 		SpawnLocations.Empty();
 
-		SpawnLocations.Add((center - rightVec * halfWidth + upVec * halfHeight) - forwardVec * pushBack);
-		SpawnLocations.Add((center + rightVec * halfWidth + upVec * halfHeight) - forwardVec * pushBack);
-		SpawnLocations.Add((center - rightVec * halfWidth - upVec * halfHeight) - forwardVec * pushBack);
-		SpawnLocations.Add((center + rightVec * halfWidth - upVec * halfHeight) - forwardVec * pushBack);
+		SpawnLocations.Add((center - rightVec * (halfWidth - bottomWidth) - upVec * halfHeight) - forwardVec * pushBack);	//left bottom
+		SpawnLocations.Add((center - rightVec * halfWidth + upVec * (halfHeight - sideHight)) - forwardVec * pushBack);		//left top
+		SpawnLocations.Add((center + upVec * halfHeight) - forwardVec * pushBack);											//top
+		SpawnLocations.Add((center + rightVec * halfWidth + upVec * (halfHeight - sideHight)) - forwardVec * pushBack);		//right top
+		SpawnLocations.Add((center + rightVec * (halfWidth - bottomWidth) - upVec * halfHeight) - forwardVec * pushBack);	//right bottom
 
 		SpawnLocations.Add(FVector::ZeroVector);
 
