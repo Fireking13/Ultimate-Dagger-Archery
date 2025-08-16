@@ -132,9 +132,11 @@ protected:
 	float OG_JumpHeight;
 	float OG_Speed;
 
+	static constexpr int32 MaxDaggers = 5;
+
 	TArray<class ADagger*> DaggerPool;
-	class ADagger* DaggersReady[5];
-	bool DaggerSpots[5];
+	class ADagger* DaggersReady[MaxDaggers];
+	bool DaggerSpots[MaxDaggers];
 
 	int8 Ammo;
 	int8 FireIndex;
@@ -173,5 +175,17 @@ public:
 	float GetOGSpeed() { return OG_Speed; }
 
 	float GetTopSpeed();
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetAmmo() { return Ammo; }
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetNumDashes() { return NumDashs; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetDashRefillDelay() { return DashRefillDelay; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetDashTimer();
 };
 

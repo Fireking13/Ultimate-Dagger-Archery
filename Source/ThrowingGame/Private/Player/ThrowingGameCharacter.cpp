@@ -55,6 +55,7 @@ AThrowingGameCharacter::AThrowingGameCharacter()
 	FireIndex = 1;
 	AdjustTimer = 0.0f;
 	AdjustTimerMax = 1.0f;
+	Ammo = 0;
 
 	AirTimeStyleDef = 1.0f;
 	AirTimeStyle = AirTimeStyleDef;
@@ -192,6 +193,8 @@ void AThrowingGameCharacter::Refill()
 
 	int8 index = 0;
 
+	Ammo = MaxDaggers;
+
 	for (bool& daggerSpot : DaggerSpots)
 	{
 		if (!daggerSpot)
@@ -219,6 +222,7 @@ void AThrowingGameCharacter::Shoot()
 		DaggerSpots[FireIndex] = false;
 
 		FireIndex++;
+		Ammo--;
 
 		if (FireIndex > 4)
 		{
@@ -345,6 +349,21 @@ float AThrowingGameCharacter::GetTopSpeed()
 	float topSpeed = FMath::Max3(SlideSpeed, DashStrength, OG_Speed);
 
 	return topSpeed;
+}
+
+float AThrowingGameCharacter::GetDashTimer()
+{
+	FTimerManager& TimerManager = GetWorldTimerManager();
+
+	float rate = TimerManager.GetTimerRate(DashRefill_TimerHandle);      
+	float elapsed = TimerManager.GetTimerElapsed(DashRefill_TimerHandle);  
+
+	if (rate <= 0.f) //safty
+	{
+		return 0.0f;
+	}
+
+	return FMath::Clamp(elapsed / rate, 0.0f, 1.0f);
 }
 
 
