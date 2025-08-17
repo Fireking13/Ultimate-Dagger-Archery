@@ -29,8 +29,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Game State Properties")
 	int32 m_Score;
 
-	float m_Time;
-
 public:
 	virtual void Tick(float DeltaTime) override;
 

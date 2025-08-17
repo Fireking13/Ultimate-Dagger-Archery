@@ -7,6 +7,30 @@
 #include "PointDisplayComponent.generated.h"
 
 
+USTRUCT(BlueprintType)
+struct FPointStats
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+    int32 HitPoints;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+    float DistanceVal;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+    float AirTimeStyle;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+    float SpeedVal;
+
+    FPointStats(int32 hitPoints, float distanceVal, float airTimeStyle, float speedVal)
+        : HitPoints(hitPoints), DistanceVal(distanceVal), AirTimeStyle(airTimeStyle), SpeedVal(speedVal)
+    {
+    }
+};
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class THROWINGGAME_API UPointDisplayComponent : public UActorComponent
 {
@@ -20,9 +44,27 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+    TArray<FPointStats> PopUpList;
+
+    float PopUpTimer;
+	float PopUpDelay;
+    float PopUpDelayOG;
+
+    float ActiveFullPoints;
+    bool ShowFull;
+
+    int32 ActiveHitPoints;
+    float ActiveDistanceVal;
+    float ActiveAirTimeStyle;
+    float ActiveSpeedVal;
+
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+    void ResetActives();
 		
+    FString GetPopUpText(int32 index);
+
+    void AddToList(int32 hitPoints, float distanceVal, float airTimeStyle, float speedVal);
 };
