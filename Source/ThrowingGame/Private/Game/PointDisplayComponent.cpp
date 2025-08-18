@@ -10,9 +10,17 @@ UPointDisplayComponent::UPointDisplayComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
+    ActiveFullPoints = 0;
+    ActiveHitPoints = 0;
+    ActiveDistanceVal = 0.f;
+    ActiveAirTimeStyle = 0.f;
+    ActiveSpeedVal = 0.f;
+    TempPoints = 0;
+
     PopUpTimer = 0.f;
-    PopUpDelayOG = 2.f;
-    PopUpDelay = PopUpDelayOG;
+    PopUpDelayMax = 2.f;
+    PopUpDelayMin = 0.5f;
+    PopUpDelay = PopUpDelayMax;
 }
 
 // Called when the game starts
@@ -33,10 +41,13 @@ void UPointDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickType,
     {
         if (PopUpList.Num() == 1)
         {
-            PopUpDelay = PopUpDelayOG;
+            PopUpDelay = PopUpDelayMax;
+            PopUpDelayTemp = PopUpDelay;
         }
-
-        PopUpTimer += DeltaTime;
+        else
+        {
+            //shrink PopUpDelay
+        }
 
         if (PopUpTimer <= 0.f)
         {
@@ -46,15 +57,39 @@ void UPointDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickType,
             ActiveSpeedVal = PopUpList[0].SpeedVal;
 
             ActiveFullPoints = ActiveHitPoints;
+            TempPoints = PopUpList[0].FullPoints;
 
             PopUpList.RemoveAt(0);
 
             PopUpTimer = PopUpDelay;
+
+            if (ShowFull)
+            {
+                PointsEffectHandler.Broadcast();
+
+                ActiveFullPoints = 0;
+            }
+
+            ShowFull = false; //safty
         }
-        else
+    }
+
+    if (PopUpTimer > 0.f)
+    {
+        PopUpTimer -= DeltaTime;
+
+        if (PopUpTimer < PopUpDelayTemp / 2.f)
         {
-            PopUpTimer -= DeltaTime;
+            AddPoints();
         }
+    }
+    else if(ShowFull)
+    {
+        PointsEffectHandler.Broadcast();
+
+        ActiveFullPoints = 0;
+
+        ShowFull = false;
     }
 }
 
@@ -64,6 +99,8 @@ void UPointDisplayComponent::ResetActives()
 	ActiveDistanceVal = 0.f;
 	ActiveAirTimeStyle = 0.f;
 	ActiveSpeedVal = 0.f;
+
+    //TODO think more on this
 }
 
 FString UPointDisplayComponent::GetPopUpText(int32 index)
@@ -97,8 +134,19 @@ FString UPointDisplayComponent::GetPopUpText(int32 index)
     return FString{};
 }
 
-void UPointDisplayComponent::AddToList(int32 hitPoints, float distanceVal, float airTimeStyle, float speedVal)
+void UPointDisplayComponent::AddToList(int32 fullPoints, int32 hitPoints, float distanceVal, float airTimeStyle, float speedVal)
 {
-    PopUpList.Add(FPointStats(hitPoints, distanceVal, airTimeStyle, speedVal));
+    PopUpList.Add(FPointStats(fullPoints, hitPoints, distanceVal, airTimeStyle, speedVal));
+}
+
+void UPointDisplayComponent::AddPoints()
+{
+    ShowFull = true;
+
+    ActiveFullPoints = TempPoints;
+    TempPoints = 0;
+    //do thing
+
+    ResetActives();
 }
 

@@ -4,12 +4,15 @@
 #include "Game/MissionHub.h"
 #include "Kismet/GameplayStatics.h"
 #include "TargetObjectPoolComponent.h"
+#include "Game/PointDisplayComponent.h"
 
 AThrowingGameGameState::AThrowingGameGameState()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
 	m_TargetPool = CreateDefaultSubobject<UTargetObjectPoolComponent>(TEXT("TargetObjectPoolComponent"));
+
+	m_PointDisplay = CreateDefaultSubobject<UPointDisplayComponent>(TEXT("PointDisplayComponent"));
 }
 
 void AThrowingGameGameState::BeginPlay()
@@ -39,6 +42,11 @@ void AThrowingGameGameState::FReceivePointsHandler(int32 points, int32 pointsOG,
 	m_Score += points;
 }
 
+void AThrowingGameGameState::FPointsEffectHandler()
+{
+	//increase size of text TODO
+}
+
 void AThrowingGameGameState::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -60,12 +68,3 @@ void AThrowingGameGameState::EndLevel()
 	}
 }
 
-AMissionHub* AThrowingGameGameState::GetMissionHub()
-{
-	return m_MissionHub;
-}
-
-UTargetObjectPoolComponent* AThrowingGameGameState::GetTargetPool()
-{
-	return m_TargetPool;
-}

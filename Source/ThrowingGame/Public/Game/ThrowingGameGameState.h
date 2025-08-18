@@ -8,6 +8,7 @@
 
 class AMissionHub;
 class UTargetObjectPoolComponent;
+class UPointDisplayComponent;
 
 UCLASS()
 class THROWINGGAME_API AThrowingGameGameState : public AGameStateBase
@@ -27,6 +28,9 @@ protected:
 	UTargetObjectPoolComponent* m_TargetPool;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Game State Properties")
+	UPointDisplayComponent* m_PointDisplay;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Game State Properties")
 	int32 m_Score;
 
 public:
@@ -36,10 +40,16 @@ public:
 
 	void EndLevel();
 
-	AMissionHub* GetMissionHub();
+	AMissionHub* GetMissionHub() { return m_MissionHub; }
 
-	UTargetObjectPoolComponent* GetTargetPool();
+	UTargetObjectPoolComponent* GetTargetPool() { return m_TargetPool; }
+
+	UFUNCTION(BlueprintCallable)
+	UPointDisplayComponent* GetPointDisplay() { return m_PointDisplay; }
 
 	UFUNCTION()
 	void FReceivePointsHandler(int32 points, int32 pointsOG, float distanceVal, float airTimeStyle, float speedVal);
+
+	UFUNCTION()
+	void FPointsEffectHandler();
 };
