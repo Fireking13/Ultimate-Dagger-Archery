@@ -33,6 +33,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Game State Properties")
 	int32 m_Score;
 
+	bool DoScoreEffect;
+	float ScoreSizeMult;
+	float ScoreSizeMax;
+	float ScoreEffectTime;
+	float ScoreEffectTimer;
+
 public:
 	virtual void Tick(float DeltaTime) override;
 
@@ -51,5 +57,13 @@ public:
 	void FReceivePointsHandler(int32 points, int32 pointsOG, float distanceVal, float airTimeStyle, float speedVal);
 
 	UFUNCTION()
-	void FPointsEffectHandler();
+	void FPointsEffectHandler(float effectTime);
+
+	UFUNCTION(BlueprintCallable)
+	int32 GetScore() { return m_Score; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetScoreSizeMult() { return ScoreSizeMult; }
+
+	void CalScoreSize(float DeltaTime);
 };

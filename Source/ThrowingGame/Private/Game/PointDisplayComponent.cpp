@@ -42,7 +42,6 @@ void UPointDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickType,
         if (PopUpList.Num() == 1)
         {
             PopUpDelay = PopUpDelayMax;
-            PopUpDelayTemp = PopUpDelay;
         }
         else
         {
@@ -65,7 +64,7 @@ void UPointDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
             if (ShowFull)
             {
-                PointsEffectHandler.Broadcast();
+                PointsEffectHandler.Broadcast((PopUpDelayTemp / 2));
 
                 ActiveFullPoints = 0;
             }
@@ -78,14 +77,14 @@ void UPointDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickType,
     {
         PopUpTimer -= DeltaTime;
 
-        if (PopUpTimer < PopUpDelayTemp / 2.f)
+        if (PopUpTimer < PopUpDelay / 2.f)
         {
             AddPoints();
         }
     }
     else if(ShowFull)
     {
-        PointsEffectHandler.Broadcast();
+        PointsEffectHandler.Broadcast((PopUpDelayTemp / 2));
 
         ActiveFullPoints = 0;
 
@@ -108,7 +107,10 @@ FString UPointDisplayComponent::GetPopUpText(int32 index)
     switch (index)
     {
     case 0:
-        return FString::Printf(TEXT("+%d Points"), ShowFull ? ActiveFullPoints : ActiveHitPoints);
+        if (ActiveFullPoints > 0 || ActiveHitPoints > 0)
+        {
+            return FString::Printf(TEXT("+%d Points"), ShowFull ? ActiveFullPoints : ActiveHitPoints);
+        }
     case 1:
         if (ActiveDistanceVal > 0.f)
         {
@@ -145,7 +147,8 @@ void UPointDisplayComponent::AddPoints()
 
     ActiveFullPoints = TempPoints;
     TempPoints = 0;
-    //do thing
+
+    PopUpDelayTemp = PopUpDelay;
 
     ResetActives();
 }

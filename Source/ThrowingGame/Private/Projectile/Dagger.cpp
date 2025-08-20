@@ -86,6 +86,8 @@ ADagger::ADagger()
 	MinSpinSpeed = 100.0f;
 	SpinDir = 1;
 
+	LifeSpan = 25.f;
+
 	InWall = false;
 	
 	Tags.Add(TEXT("Dagger"));
@@ -218,6 +220,8 @@ void ADagger::Shoot()
 	int8 num = FMath::RandRange(0, 1);
 
 	SpinDir = (num > 0) ? 1 : -1;
+
+	GetWorldTimerManager().SetTimer(Destroy_TimerHandle, this, &ADagger::DestroyProjectile, LifeSpan, false);
 }
 
 void ADagger::FoucedAdjust(FVector targetPos)
@@ -271,6 +275,8 @@ void ADagger::Reset(int posNum)
 		Speed = 5000.0f;
 
 		ProjectileMovementComponent->Activate(true);
+
+		GetWorld()->GetTimerManager().ClearTimer(Destroy_TimerHandle); //safty
 	}
 }
 
@@ -288,6 +294,8 @@ void ADagger::DestroyProjectile()
 
 	ProjectileMovementComponent->Velocity = FVector::ZeroVector;
 	Speed = 0.0f;
+
+	GetWorld()->GetTimerManager().ClearTimer(Destroy_TimerHandle);
 }
 
 void ADagger::ResetSpawnLocations()

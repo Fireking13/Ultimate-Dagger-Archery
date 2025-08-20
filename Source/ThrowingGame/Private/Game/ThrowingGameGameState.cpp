@@ -13,6 +13,11 @@ AThrowingGameGameState::AThrowingGameGameState()
 	m_TargetPool = CreateDefaultSubobject<UTargetObjectPoolComponent>(TEXT("TargetObjectPoolComponent"));
 
 	m_PointDisplay = CreateDefaultSubobject<UPointDisplayComponent>(TEXT("PointDisplayComponent"));
+
+	DoScoreEffect = false; 
+	ScoreSizeMult = 1.f;
+	ScoreSizeMax = 2.f;
+	ScoreEffectTime = 0.f;
 }
 
 void AThrowingGameGameState::BeginPlay()
@@ -39,17 +44,43 @@ void AThrowingGameGameState::BeginPlay()
 
 void AThrowingGameGameState::FReceivePointsHandler(int32 points, int32 pointsOG, float distanceVal, float airTimeStyle, float speedVal)
 {
-	m_Score += points;
+	m_PointDisplay->AddToList(points, pointsOG, distanceVal, airTimeStyle, speedVal);
+
+	m_Score += points; //TODO delay
 }
 
-void AThrowingGameGameState::FPointsEffectHandler()
+void AThrowingGameGameState::FPointsEffectHandler(float effectTime) //move this after is works TODO:
 {
-	//increase size of text TODO
+	ScoreEffectTime = effectTime;
+	ScoreEffectTimer = ScoreEffectTime;
+	DoScoreEffect = true;
+}
+
+void AThrowingGameGameState::CalScoreSize(float DeltaTime)
+{
+	float timeNormalized = 1.f - (ScoreEffectTimer / ScoreEffectTime);
+	float height = ScoreSizeMax - 1.f;
+
+	ScoreSizeMult = 1.f + 4.f * height * timeNormalized * (1.f - timeNormalized);
+
+	ScoreEffectTimer -= DeltaTime;
+
+	if (ScoreEffectTimer <= 0.f)
+	{
+		DoScoreEffect = false; 
+		ScoreEffectTime = 0.f;
+		ScoreEffectTimer = 0.f;
+	}
 }
 
 void AThrowingGameGameState::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (DoScoreEffect)
+	{
+		CalScoreSize(DeltaTime);
+	}
 }
 
 void AThrowingGameGameState::StartLevel()
@@ -58,6 +89,11 @@ void AThrowingGameGameState::StartLevel()
 	{
 		m_MissionHub->StartUp();
 	}
+
+	DoScoreEffect = false;
+
+	m_PointDisplay->GetPointsEffectHandler().AddDynamic(this, &AThrowingGameGameState::FPointsEffectHandler);
+	
 }
 
 void AThrowingGameGameState::EndLevel()

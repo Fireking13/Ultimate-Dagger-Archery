@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "PointDisplayComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FPointsEffectHandler);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPointsEffectHandler, float, effectTime);
 
 USTRUCT(BlueprintType)
 struct FPointStats
@@ -27,6 +27,8 @@ struct FPointStats
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
     float SpeedVal;
+
+    FPointStats() = default;
 
     FPointStats(int32 fullPoints,int32 hitPoints, float distanceVal, float airTimeStyle, float speedVal)
         : FullPoints(fullPoints), HitPoints(hitPoints), DistanceVal(distanceVal), AirTimeStyle(airTimeStyle), SpeedVal(speedVal)
@@ -75,11 +77,12 @@ public:
 
     void ResetActives();
 		
+    UFUNCTION(BlueprintCallable)
     FString GetPopUpText(int32 index);
 
     void AddToList(int32 fullPoints, int32 hitPoints, float distanceVal, float airTimeStyle, float speedVal);
 
     void AddPoints();
 
-    FPointsEffectHandler& GetReceivePointsHandler() { return PointsEffectHandler; };
+    FPointsEffectHandler& GetPointsEffectHandler() { return PointsEffectHandler; };
 };
