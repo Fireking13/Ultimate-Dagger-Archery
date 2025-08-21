@@ -66,10 +66,16 @@ protected:
 	UPROPERTY(BlueprintAssignable, Category = "Target Properties")
 	FReceivePointsHandler ReceivePoints;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
+	bool NotCentered;
+
 	float DistanceIntervalVal;
 	float DistanceIntervalDis;
 	float DistanceMin;
 	float DistanceValMax;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
+	float Speed;
 
 protected:
 
@@ -87,11 +93,11 @@ public:
 
 	virtual void Reset();
 
-	virtual void Deactivate();
+	void Deactivate();
 
 	void HitCheck(AActor* dagger, FVector HitPoint);
 
-	void CalculatePoints(float dis);
+	void CalculatePoints(float dis, class ADagger* dagger);
 
 	void SendPoints(float num);
 
@@ -102,6 +108,9 @@ public:
 	FReceivePointsHandler& GetReceivePointsHandler() { return ReceivePoints; };
 
 	void RemoveDaggers();
+
+	void SetSpeed(float speed) { Speed = speed; }
+	float GetSpeed() { return Speed; }
 
 protected:
 	void LifeSpanCheck(float deltaTime);

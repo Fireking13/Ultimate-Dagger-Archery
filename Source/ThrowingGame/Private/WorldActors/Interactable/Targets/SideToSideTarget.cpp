@@ -6,7 +6,7 @@ ASideToSideTarget::ASideToSideTarget()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	Speed = 100.0f;
+	//Speed = 100.0f;
 	Index = 0;
 }
 
@@ -62,35 +62,7 @@ void ASideToSideTarget::Reset()
 	Health = MaxHealth;
 }
 
-void ASideToSideTarget::Deactivate()
-{
-	RemoveDaggers();
-
-	IsActive = false;
-
-	StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-
-	StaticMeshComponent->SetVisibility(false);
-	StaticMeshComponent->SetHiddenInGame(true);
-
-	StaticMeshComponent->SetCastShadow(false);
-	StaticMeshComponent->bCastDynamicShadow = false;
-	StaticMeshComponent->bCastStaticShadow = false;
-
-	GetWorld()->GetTimerManager().ClearTimer(Destroy_TimerHandle);
-
-	OnTargetDeactivation.Broadcast();
-	//OnTargetDeactivation.Clear();
-}
-
 void ASideToSideTarget::SetUpPoints(TArray<FVector> points)
 {
 	Points = points;
 }
-
-/*void ASideToSideTarget::SetUpPoints(FVector start, FVector end)
-{
-	StartPoint = start;
-	EndPoint = end;
-}*/

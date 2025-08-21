@@ -21,7 +21,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	bool isNotDone;
+	float Speed;
+
+	bool FaceOutwards;
+
+	bool IsActive;
 
 	class ABaseTarget* m_Target;
 
@@ -35,7 +39,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void StartUp(TArray<FVector> points);
+	virtual void StartUp(TArray<FVector> points, AActor* actorWithSpline, float speed, bool faceOutwards);
 
 	FOnMissionComplete& GetMissionHandler() { return OnMissionComplete; };
 };

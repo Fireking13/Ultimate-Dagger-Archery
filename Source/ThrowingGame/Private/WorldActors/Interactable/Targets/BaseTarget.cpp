@@ -38,6 +38,7 @@ ABaseTarget::ABaseTarget()
 	MaxPoints = 100.f; 
 	RingNum = 5;
 	Health = MaxHealth;
+	NotCentered = true;
 
 	DistanceIntervalVal = 10.0f;
 	DistanceIntervalDis = 200.0f;
@@ -120,9 +121,17 @@ void ABaseTarget::Deactivate()
 
 void ABaseTarget::HitCheck(AActor* dagger, FVector HitPoint)
 {
-	FVector OffSet = FVector(0.f, -1.0f, 97.0f);
-	FVector LocalOffset = GetActorTransform().TransformVector(OffSet);
-	CenterPoint = GetActorLocation() + LocalOffset;
+	if (NotCentered)
+	{
+		FVector OffSet = FVector(0.f, -1.0f, 97.0f);
+		FVector LocalOffset = GetActorTransform().TransformVector(OffSet);
+		CenterPoint = GetActorLocation() + LocalOffset;
+	}
+	else
+	{
+		CenterPoint = GetActorLocation();
+	}
+	
 
 	FVector forward = GetActorForwardVector();
 	FVector daggerForward = dagger->GetActorForwardVector();
@@ -133,7 +142,7 @@ void ABaseTarget::HitCheck(AActor* dagger, FVector HitPoint)
 	{
 		float dis = FVector::Dist(HitPoint, CenterPoint);
 
-		CalculatePoints(dis);
+		CalculatePoints(dis, Cast<ADagger>(dagger));
 		Health--;
 
 		if (Health <= 0)
@@ -147,7 +156,7 @@ void ABaseTarget::HitCheck(AActor* dagger, FVector HitPoint)
 	}
 }
 
-void ABaseTarget::CalculatePoints(float dis)
+void ABaseTarget::CalculatePoints(float dis, ADagger* dagger)
 {
 	float points = MaxPoints;
 
@@ -168,43 +177,42 @@ void ABaseTarget::CalculatePoints(float dis)
 
 	int32 pointsOG = int32(points);
 
-	AThrowingGameCharacter* Player = Cast<AThrowingGameCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+	//AThrowingGameCharacter* Player = Cast<AThrowingGameCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
 
-	if (Player)
+	float distance = FVector::Dist(dagger->GetPlayerLocAtFire(), GetActorLocation());
+
+	float newDistance = distance - DistanceMin;
+	int intervals = 0;
+
+	if (newDistance > 0)
 	{
-		float distance = FVector::Dist(Player->GetActorLocation(), GetActorLocation());
-
-		float newDistance = distance - DistanceMin;
-		int intervals = 0;
-
-		if (newDistance > 0)
-		{
-			intervals = newDistance / DistanceIntervalDis;
-		}
-
-		distanceVal = DistanceIntervalVal * intervals;
-
-		distanceVal = FMath::Clamp(distanceVal, 0.f, DistanceValMax);
-
-		float speed = Player->GetVelocity().Size();
-		float ogSpeed = Player->GetOGSpeed();
-		float topSpeed = Player->GetTopSpeed();
-
-		float speedRatio = speed / topSpeed;
-
-		speedVal = 1.0f + speedRatio * (2.5f - 1.0f) * (ogSpeed / topSpeed);
-		speedVal = FMath::Clamp(speedVal, 1.0f, 2.5f);
-
-		//points += distanceVal;
-
-		//points *= Player->GetAirTimeStyle();
-
-		points = points + distanceVal + (points * Player->GetAirTimeStyle() - points) + (points * speedVal - points);
+		intervals = newDistance / DistanceIntervalDis;
 	}
+
+	distanceVal = DistanceIntervalVal * intervals;
+
+	distanceVal = FMath::Clamp(distanceVal, 0.f, DistanceValMax);
+
+	float speed = dagger->GetPlayerVelocityAtFire();
+	float ogSpeed = dagger->GetPlayerOGSpeedAtFire();
+	float topSpeed = dagger->GetPlayerTopSpeedAtFire();
+
+	float speedRatio = speed / topSpeed;
+
+	speedVal = 1.0f + speedRatio * (2.5f - 1.0f) * (ogSpeed / topSpeed);
+	speedVal = FMath::Clamp(speedVal, 1.0f, 2.5f);
+
+	//points += distanceVal;
+
+	//points *= Player->GetAirTimeStyle();
+
+	float airTimeStyle = dagger->GetPlayerAirStyleAtFire();
+
+	points = points + distanceVal + (points * airTimeStyle - points) + (points * speedVal - points);
 
 	int32 pointsInt = int32(points);
 
-	ReceivePoints.Broadcast(pointsInt, pointsOG, distanceVal, Player->GetAirTimeStyle(), speedVal);
+	ReceivePoints.Broadcast(pointsInt, pointsOG, distanceVal, airTimeStyle, speedVal);
 	SendPoints(points); //todo remove
 }
 

@@ -9,7 +9,7 @@ AMissionBase::AMissionBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	isNotDone = false;
+	IsActive = false;
 }
 
 // Called when the game starts or when spawned
@@ -21,7 +21,7 @@ void AMissionBase::BeginPlay()
 
 void AMissionBase::FOnTargetDeactivationHandler()
 {
-	isNotDone = true;
+	IsActive = false;
 
 	m_Target = nullptr;
 
@@ -36,7 +36,7 @@ void AMissionBase::Tick(float DeltaTime)
 
 }
 
-void AMissionBase::StartUp(TArray<FVector> points)
+void AMissionBase::StartUp(TArray<FVector> points, AActor* actorWithSpline, float speed, bool faceOutwards)
 {
 }
 

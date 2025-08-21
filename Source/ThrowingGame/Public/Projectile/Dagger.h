@@ -46,6 +46,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Dagger")
 	TSubclassOf<class APlacedDagger> BP_PlacedDagger;
 
+	FVector PlayerLocAtFire;
+	float PlayerAirStyleAtFire;
+	float PlayerVelocityAtFire;
+	float PlayerOGSpeedAtFire;
+	float PlayerTopSpeedAtFire;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -87,4 +93,10 @@ public:
 	virtual void DestroyProjectile() override;
 
 	void ResetSpawnLocations();
+
+	FVector GetPlayerLocAtFire()	{ return PlayerLocAtFire; }
+	float GetPlayerAirStyleAtFire() { return PlayerAirStyleAtFire; }
+	float GetPlayerVelocityAtFire() { return PlayerVelocityAtFire; }
+	float GetPlayerOGSpeedAtFire()	{ return PlayerOGSpeedAtFire; }
+	float GetPlayerTopSpeedAtFire() { return PlayerTopSpeedAtFire; }
 };

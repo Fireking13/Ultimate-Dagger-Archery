@@ -24,9 +24,16 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
 	TArray<FVector> Points;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
+	AActor* ActorWithSpline;
+
+	class USplineComponent* SplineComp;
+
+	float DistanceAlongSpline;
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void StartUp(TArray<FVector> points) override;
+	virtual void StartUp(TArray<FVector> points, AActor* actorWithSpline, float speed, bool faceOutwards) override;
 };

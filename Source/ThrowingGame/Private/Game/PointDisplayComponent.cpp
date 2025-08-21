@@ -21,6 +21,11 @@ UPointDisplayComponent::UPointDisplayComponent()
     PopUpDelayMax = 2.f;
     PopUpDelayMin = 0.5f;
     PopUpDelay = PopUpDelayMax;
+
+    for (int32 i = 0; i < 4; i++)
+    {
+        ActiveTextIndex.Add(-1);
+    }
 }
 
 // Called when the game starts
@@ -45,7 +50,13 @@ void UPointDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickType,
         }
         else
         {
-            //shrink PopUpDelay
+            float num = float(PopUpList.Num());
+
+            float k = 2.0f; //edit this
+
+            float ratio = logf(num) / (logf(num) + k);
+
+            PopUpDelay = PopUpDelayMin + (PopUpDelayMax - PopUpDelayMin) * (1.0f - ratio);
         }
 
         if (PopUpTimer <= 0.f)
@@ -55,7 +66,7 @@ void UPointDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickType,
             ActiveAirTimeStyle = PopUpList[0].AirTimeStyle;
             ActiveSpeedVal = PopUpList[0].SpeedVal;
 
-            ActiveFullPoints = ActiveHitPoints;
+            //ActiveFullPoints = ActiveHitPoints;
             TempPoints = PopUpList[0].FullPoints;
 
             PopUpList.RemoveAt(0);
@@ -77,7 +88,7 @@ void UPointDisplayComponent::TickComponent(float DeltaTime, ELevelTick TickType,
     {
         PopUpTimer -= DeltaTime;
 
-        if (PopUpTimer < PopUpDelay / 2.f)
+        if (PopUpTimer <= PopUpDelay / 2.f && !ShowFull)
         {
             AddPoints();
         }
@@ -99,6 +110,10 @@ void UPointDisplayComponent::ResetActives()
 	ActiveAirTimeStyle = 0.f;
 	ActiveSpeedVal = 0.f;
 
+    for (int32 i = 0; i < ActiveTextIndex.Num(); i++)
+    {
+        ActiveTextIndex[i] = -1;
+    }
     //TODO think more on this
 }
 
@@ -109,24 +124,55 @@ FString UPointDisplayComponent::GetPopUpText(int32 index)
     case 0:
         if (ActiveFullPoints > 0 || ActiveHitPoints > 0)
         {
-            return FString::Printf(TEXT("+%d Points"), ShowFull ? ActiveFullPoints : ActiveHitPoints);
+            if (ShowFull)
+            {
+                return FString::Printf(TEXT("+%d Points"), ActiveFullPoints);
+            }
+            else
+            {
+                return FString::Printf(TEXT("+%d Points"), ActiveHitPoints);
+            }
         }
     case 1:
         if (ActiveDistanceVal > 0.f)
         {
-            return FString::Printf(TEXT("+%.1f Distance"), ActiveDistanceVal);
+            if (ActiveTextIndex[1] == -1)
+            {
+                ActiveTextIndex[1] = index;
+            }
+            
+            if (ActiveTextIndex[1] == index)
+            {
+                return FString::Printf(TEXT("+%.1f Distance"), ActiveDistanceVal);
+            }
         }
         [[fallthrough]];
     case 2:
         if (ActiveAirTimeStyle > 1.f)
         {
-            return FString::Printf(TEXT("+%.1f Air Time"), ActiveAirTimeStyle);
+            if (ActiveTextIndex[2] == -1)
+            {
+                ActiveTextIndex[2] = index;
+            }
+
+            if (ActiveTextIndex[2] == index)
+            {
+                return FString::Printf(TEXT("+%.1f Air Time"), ActiveAirTimeStyle);
+            }
         }
         [[fallthrough]];
     case 3:
         if (ActiveSpeedVal > 1.f)
         {
-            return FString::Printf(TEXT("+%.1f Speed"), ActiveSpeedVal);
+            if (ActiveTextIndex[3] == -1)
+            {
+                ActiveTextIndex[3] = index;
+            }
+
+            if (ActiveTextIndex[3] == index)
+            {
+                return FString::Printf(TEXT("+%.1f Speed"), ActiveSpeedVal);
+            }
         }
         break;
     default:

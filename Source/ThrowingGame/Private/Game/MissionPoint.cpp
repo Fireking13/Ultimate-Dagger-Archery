@@ -87,7 +87,7 @@ void AMissionPoint::StartUp()
 	{
 		m_Mission->GetMissionHandler().Clear();//RemoveDynamic(this, &AMissionPoint::FOnMissionCompleteHandler);
 		m_Mission->GetMissionHandler().AddDynamic(this, &AMissionPoint::FOnMissionCompleteHandler);
-		m_Mission->StartUp(PointLocs);
+		m_Mission->StartUp(PointLocs, ActorWithSpline, Speed, FaceOutwards);
 	}
 	else
 	{

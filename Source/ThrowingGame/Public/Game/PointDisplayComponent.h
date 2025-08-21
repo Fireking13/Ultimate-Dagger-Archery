@@ -58,13 +58,15 @@ protected:
     float PopUpDelayMax;
     float PopUpDelayTemp;
 
-    float ActiveFullPoints;
+    int32 ActiveFullPoints;
     bool ShowFull;
 
     int32 ActiveHitPoints;
     float ActiveDistanceVal;
     float ActiveAirTimeStyle;
     float ActiveSpeedVal;
+
+    TArray<int32> ActiveTextIndex;
 
     int32 TempPoints;
 

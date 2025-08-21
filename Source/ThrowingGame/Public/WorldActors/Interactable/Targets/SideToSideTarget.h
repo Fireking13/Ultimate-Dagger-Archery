@@ -23,15 +23,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
-	float Speed;
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
-	//FVector StartPoint;
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
-	//FVector EndPoint;
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Target Properties")
 	TArray<FVector> Points;
 
 private:
@@ -44,10 +35,6 @@ public:
 	virtual void Spawn(FVector loc, FRotator rot) override;
 
 	virtual void Reset() override;
-
-	virtual void Deactivate() override;
-
-	//void SetUpPoints(FVector start, FVector end);
 
 	void SetUpPoints(TArray<FVector> points);
 };

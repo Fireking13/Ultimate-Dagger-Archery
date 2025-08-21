@@ -222,6 +222,12 @@ void ADagger::Shoot()
 	SpinDir = (num > 0) ? 1 : -1;
 
 	GetWorldTimerManager().SetTimer(Destroy_TimerHandle, this, &ADagger::DestroyProjectile, LifeSpan, false);
+
+	PlayerLocAtFire = PlayerCharacter->GetActorLocation();
+	PlayerAirStyleAtFire = PlayerCharacter->GetAirTimeStyle();
+	PlayerVelocityAtFire = PlayerCharacter->GetVelocity().Size();
+	PlayerOGSpeedAtFire = PlayerCharacter->GetOGSpeed();
+	PlayerTopSpeedAtFire = PlayerCharacter->GetTopSpeed();
 }
 
 void ADagger::FoucedAdjust(FVector targetPos)
@@ -277,6 +283,12 @@ void ADagger::Reset(int posNum)
 		ProjectileMovementComponent->Activate(true);
 
 		GetWorld()->GetTimerManager().ClearTimer(Destroy_TimerHandle); //safty
+
+		PlayerLocAtFire = FVector::ZeroVector;
+		PlayerAirStyleAtFire = 0.f;
+		PlayerVelocityAtFire = 0.f;
+		PlayerOGSpeedAtFire = 0.f;
+		PlayerTopSpeedAtFire = 0.f;
 	}
 }
 

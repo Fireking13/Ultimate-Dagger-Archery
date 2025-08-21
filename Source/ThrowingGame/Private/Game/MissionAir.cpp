@@ -21,7 +21,7 @@ void AMissionAir::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AMissionAir::StartUp(TArray<FVector> points)
+void AMissionAir::StartUp(TArray<FVector> points, AActor* actorWithSpline, float speed, bool faceOutwards)
 {
 	AGameStateBase* baseGameState = GetWorld()->GetGameState();
 
@@ -35,4 +35,6 @@ void AMissionAir::StartUp(TArray<FVector> points)
 		m_Target->GetTargetHandler().AddDynamic(this, &AMissionAir::FOnTargetDeactivationHandler);
 		m_Target->Spawn(GetActorLocation(), GetActorRotation());
 	}
+
+	IsActive = true;
 }

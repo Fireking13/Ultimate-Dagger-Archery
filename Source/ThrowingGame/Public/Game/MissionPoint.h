@@ -53,6 +53,15 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
 	TArray<AActor*> Points;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
+	float Speed = 0;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
+	bool FaceOutwards = true;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
+	AActor* ActorWithSpline;
+
 	UPROPERTY(VisibleDefaultsOnly, Category = "EditorOnly")
 	class UArrowComponent* ArrowComponent;
 

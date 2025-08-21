@@ -100,6 +100,17 @@ ASplineTarget* UTargetObjectPoolComponent::GetASplineTarget()
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 			newTarget = GetWorld()->SpawnActor<ASplineTarget>(BP_SplineTarget, SpawnLocation, SpawnRot, SpawnParams);
+
+			AThrowingGameGameState* GameState = Cast<AThrowingGameGameState>(GetWorld()->GetGameState());
+			if (GameState)
+			{
+				newTarget->GetReceivePointsHandler().AddDynamic(GameState, &AThrowingGameGameState::FReceivePointsHandler);
+			}
+			else
+			{
+				//error
+			}
+
 			m_SplineTargetPool.Add(newTarget);
 		}
 	}
@@ -130,6 +141,17 @@ ASideToSideTarget* UTargetObjectPoolComponent::GetASideToSideTarget()
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 			newTarget = GetWorld()->SpawnActor<ASideToSideTarget>(BP_SideToSideTarget, SpawnLocation, SpawnRot, SpawnParams);
+
+			AThrowingGameGameState* GameState = Cast<AThrowingGameGameState>(GetWorld()->GetGameState());
+			if (GameState)
+			{
+				newTarget->GetReceivePointsHandler().AddDynamic(GameState, &AThrowingGameGameState::FReceivePointsHandler);
+			}
+			else
+			{
+				//error
+			}
+
 			m_SideToSideTargetPool.Add(newTarget);
 		}
 	}

@@ -35,5 +35,5 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void StartUp(TArray<FVector> points) override;
+	virtual void StartUp(TArray<FVector> points, AActor* actorWithSpline, float speed, bool faceOutwards) override;
 };

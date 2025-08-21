@@ -20,7 +20,7 @@ void AMissionGround::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AMissionGround::StartUp(TArray<FVector> points)
+void AMissionGround::StartUp(TArray<FVector> points, AActor* actorWithSpline, float speed, bool faceOutwards)
 {
 	AGameStateBase* baseGameState = GetWorld()->GetGameState();
 
@@ -64,4 +64,6 @@ void AMissionGround::StartUp(TArray<FVector> points)
 	m_Target->GetTargetHandler().Clear();//.RemoveDynamic(this, &AMissionGround::FOnTargetDeactivationHandler);
 	m_Target->GetTargetHandler().AddDynamic(this, &AMissionGround::FOnTargetDeactivationHandler);
 	m_Target->Spawn(newPos, GetActorRotation());
+
+	IsActive = true;
 }

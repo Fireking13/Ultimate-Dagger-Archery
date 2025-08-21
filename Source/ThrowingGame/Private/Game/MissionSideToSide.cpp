@@ -21,8 +21,9 @@ void AMissionSideToSide::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void AMissionSideToSide::StartUp(TArray<FVector> points)
+void AMissionSideToSide::StartUp(TArray<FVector> points, AActor* actorWithSpline, float speed, bool faceOutwards)
 {
+	Speed = speed;
 	Points = points;
 
 	AGameStateBase* baseGameState = GetWorld()->GetGameState();
@@ -34,6 +35,7 @@ void AMissionSideToSide::StartUp(TArray<FVector> points)
 		ASideToSideTarget* target = gameState->GetTargetPool()->GetASideToSideTarget();
 
 		target->SetUpPoints(Points);
+		target->SetSpeed(speed); //TODO remove this move logic to mission
 
 		target->GetTargetHandler().Clear(); //.RemoveDynamic(this, &AMissionSideToSide::FOnTargetDeactivationHandler);
 		target->GetTargetHandler().AddDynamic(this, &AMissionSideToSide::FOnTargetDeactivationHandler);
@@ -41,4 +43,6 @@ void AMissionSideToSide::StartUp(TArray<FVector> points)
 
 		m_Target = target;
 	}
+
+	IsActive = true;
 }
