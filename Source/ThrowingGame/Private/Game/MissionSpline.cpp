@@ -37,6 +37,13 @@ void AMissionSpline::Tick(float DeltaTime)
 
 		FVector newLoc = SplineComp->GetLocationAtDistanceAlongSpline(DistanceAlongSpline, ESplineCoordinateSpace::World);
 		FRotator newRot = SplineComp->GetRotationAtDistanceAlongSpline(DistanceAlongSpline, ESplineCoordinateSpace::World);
+
+		if (FaceOutwards)
+		{
+			newRot.Yaw += 180.0f;
+			newRot.Normalize();
+		}
+
 		m_Target->SetActorLocationAndRotation(newLoc, newRot);
 	}
 }

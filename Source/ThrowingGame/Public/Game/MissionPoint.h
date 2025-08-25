@@ -56,7 +56,7 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
 	float Speed = 0;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties", meta = (ToolTip = "Clockwise Perspective"))
 	bool FaceOutwards = true;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Mission Properties")

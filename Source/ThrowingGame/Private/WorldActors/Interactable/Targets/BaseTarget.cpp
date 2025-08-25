@@ -46,7 +46,6 @@ ABaseTarget::ABaseTarget()
 	DistanceValMax = 100.0f;
 
 	Tags.Add(TEXT("Target"));
-
 }
 
 // Called when the game starts or when spawned
@@ -124,6 +123,12 @@ void ABaseTarget::HitCheck(AActor* dagger, FVector HitPoint)
 	if (NotCentered)
 	{
 		FVector OffSet = FVector(0.f, -1.0f, 97.0f);
+
+		if (ActorHasTag(TEXT("Sideways")))
+		{
+			OffSet = FVector(-1.f, 0.0f, 97.0f);
+		}
+
 		FVector LocalOffset = GetActorTransform().TransformVector(OffSet);
 		CenterPoint = GetActorLocation() + LocalOffset;
 	}
@@ -133,7 +138,7 @@ void ABaseTarget::HitCheck(AActor* dagger, FVector HitPoint)
 	}
 	
 
-	FVector forward = GetActorForwardVector();
+	FVector forward = StaticMeshComponent->GetForwardVector();//GetActorForwardVector();
 	FVector daggerForward = dagger->GetActorForwardVector();
 
 	float dot = FVector::DotProduct(daggerForward, forward);
